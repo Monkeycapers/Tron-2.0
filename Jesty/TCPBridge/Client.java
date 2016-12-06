@@ -21,6 +21,12 @@ public class Client implements Runnable {
 
     private boolean isRunning = false;
 
+    private long lastping = 0;
+
+    private long latency = 0;
+
+    private final long WARN_HIGH_PING = 100;
+
     public Client(String hostName, int portNumber) {
         this.hostName = hostName;
         this.portNumber = portNumber;
@@ -43,6 +49,10 @@ public class Client implements Runnable {
     }
     //
 
+    public long getLatency() {
+        return latency;
+    }
+
     public void run() {
         isRunning = true;
         try (
@@ -58,6 +68,10 @@ public class Client implements Runnable {
             while (isRunning) {
                 //Read message in
                 String strIn = in.readUTF();
+                latency = System.currentTimeMillis() - lastping;
+                if (latency > WARN_HIGH_PING) {
+                    onHighPing(latency);
+                }
                 onMessage(strIn);
             }
         }
@@ -78,6 +92,10 @@ public class Client implements Runnable {
 
     }
 
+    public void onHighPing(long latency) {
+
+    }
+
     public boolean sendMessage(String message) {
         try {
             out.writeUTF(message);
@@ -86,6 +104,7 @@ public class Client implements Runnable {
             e.printStackTrace();
             return false;
         }
+        lastping = System.currentTimeMillis();
         return true;
     }
 
