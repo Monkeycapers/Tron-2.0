@@ -1,5 +1,7 @@
 package Client;
 
+import org.json.JSONObject;
+
 /**
  * Created by Evan on 11/3/2016.
  * Extends TCPBridge client class, makes a connection with the Server and handles/sends messages. Functionally similar
@@ -17,6 +19,12 @@ public class GameClient extends Jesty.TCPBridge.Client {
 //
     @Override
     public void onMessage(String message) {
+        JSONObject jsonObject = new JSONObject(message);
+        String argument = jsonObject.getString("argument");
+
+        if (argument.equals("")) {
+            //...//
+        }
 
     }
 
@@ -27,6 +35,11 @@ public class GameClient extends Jesty.TCPBridge.Client {
     @Override
     public void onClose() {
 
+    }
+
+    @Override
+    public void onHighPing(long latency) {
+        System.out.println("Warning: High Ping (" + latency + ")");
     }
 
     public void close() {
