@@ -29,7 +29,8 @@ public class Authenticate {
             for (Object u: users) {
                 System.out.println((String)u.toString());
                 //Feast your eyes
-                JSONObject user = new JSONObject((String)u.toString().replaceAll("=", ":"));
+                JSONObject user = new JSONObject((HashMap)u);
+                //JSONObject user = new JSONObject((String)u.toString().replaceAll("=", ":"));
                 //
                 if (user.getString("name").equals(name)) {
                     if (user.getString("pass").equals(pass)) {
