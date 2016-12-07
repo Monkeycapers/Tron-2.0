@@ -15,13 +15,19 @@ public class Settings {
 
     private static File settingsfile = new File(Settings.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "\\settings.txt");
 
-    public static boolean setFile(File file) {
-        if (file.exists()) {
-            settingsfile = file;
-            return true;
+    public static void setFile(File file, HashMap<String, String> defaults) {
+        settingsfile = file;
+        try {
+            if (file.createNewFile()) {
+                propertys = defaults;
+                save();
+            }
         }
-        return false;
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     public static void load() {
         propertys = new HashMap<String, String>();
