@@ -9,8 +9,8 @@ package Jesty.TCPBridge;
 public class test {
 
     public test() {
-        Server s = new Server(16000, 8080);
-        s.start();
+        //Server s = new Server(16000, 8080);
+        //s.start();
     }
 
     public static void main (String[] args) {

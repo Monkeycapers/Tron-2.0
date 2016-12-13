@@ -12,7 +12,7 @@ import java.net.Socket;
  * A client class to connect with a Server.
  * Extend it to use it in your project
  */
-public class Client implements Runnable {
+public abstract class Client implements Runnable {
 
     private String hostName;
     private int portNumber;
@@ -24,6 +24,8 @@ public class Client implements Runnable {
     private long lastping = 0;
 
     private long latency = 0;
+
+    private boolean expectingResponse;
 
     private final long WARN_HIGH_PING = 100;
 
@@ -68,9 +70,12 @@ public class Client implements Runnable {
             while (isRunning) {
                 //Read message in
                 String strIn = in.readUTF();
-                latency = System.currentTimeMillis() - lastping;
-                if (latency > WARN_HIGH_PING) {
-                    onHighPing(latency);
+                if (expectingResponse) {
+                    expectingResponse = false;
+                    latency = System.currentTimeMillis() - lastping;
+                    if (latency > WARN_HIGH_PING) {
+                        onHighPing(latency);
+                    }
                 }
                 onMessage(strIn);
             }
@@ -80,21 +85,17 @@ public class Client implements Runnable {
         }
     }
 
-    public void onMessage(String message) {
+    public abstract void onMessage(String message);
 
-    }
 
-    public void onOpen() {
+    public abstract void onOpen();
 
-    }
 
-    public void onClose() {
+    public abstract void onClose();
 
-    }
 
-    public void onHighPing(long latency) {
+    public abstract void onHighPing(long latency);
 
-    }
 
     public boolean sendMessage(String message) {
         try {
@@ -105,6 +106,7 @@ public class Client implements Runnable {
             return false;
         }
         lastping = System.currentTimeMillis();
+        expectingResponse = true;
         return true;
     }
 

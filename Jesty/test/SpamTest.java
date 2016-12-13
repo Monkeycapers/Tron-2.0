@@ -58,6 +58,10 @@ public class SpamTest extends Client {
     public void onClose() {
 
     }
+    @Override
+    public void onHighPing(long ping) {
+
+    }
 
 
 

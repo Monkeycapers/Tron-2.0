@@ -123,6 +123,7 @@ public class ClientWorker implements Runnable {
     //Todo: implement codes
     public void disconnect() {
         server.onClose(this, 0);
+        server.clients.remove(this);
     }
     //
     public void connect() {
