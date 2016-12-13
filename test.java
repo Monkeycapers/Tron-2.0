@@ -18,5 +18,6 @@ public class test {
             System.out.print(">");
             client.sendMessage(new Scanner(System.in).nextLine());
         }
+        //new Thread(new Rayc()).start();
     }
 }

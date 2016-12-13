@@ -36,10 +36,12 @@ public class Settings {
             //settingsfile.mkdirs();
             if (settingsfile.createNewFile()) {
                 //Create defaults
-                propertys.put("hostname", "localhost");
-                propertys.put("portnumber", "16000");
-                propertys.put("theme", "dark");
-                save();
+                //this really shouldn't be called
+                System.err.println("File should already be created");
+                //propertys.put("hostname", "localhost");
+                //propertys.put("portnumber", "16000");
+                //propertys.put("theme", "dark");
+                //save();
             }
             else {
                 BufferedReader in = new BufferedReader(new FileReader(settingsfile));
