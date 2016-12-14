@@ -12,6 +12,9 @@ import java.util.ArrayList;
 
 /**
  * Created by Evan on 12/13/2016.
+ *
+ * A class that contains all commands, and orchestrates commands, that is given
+ * a command name, find a command to execute, and return it's results if necessary
  */
 public class Commands {
 
@@ -24,9 +27,10 @@ public class Commands {
         commands = new ArrayList<>();
         commands.add(new SignInCommand());
         commands.add(new SignUpCommand());
+        commands.add(new StopCommand());
     }
 
-    public String orchastrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {
+    public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {
         StringWriter stringWriter = new StringWriter();
         User user =(User)clientWorker.clientData;
         Command command = getCommand(jsonObject.getString("argument"));
@@ -40,6 +44,7 @@ public class Commands {
                 return command.docommand(clientWorker, clients, jsonObject, user);
             }
             else {
+                command.docommand(clientWorker, clients, jsonObject, user);
                 return "noreturnsuccsess";
             }
         }

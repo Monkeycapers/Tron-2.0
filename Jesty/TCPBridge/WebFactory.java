@@ -26,8 +26,8 @@ public class WebFactory extends WebSocketServer {
 
 
     public void onOpen(WebSocket client, ClientHandshake handshake) {
-        client.send("You have connected");
-        System.out.println("got a connection: " + client.getRemoteSocketAddress().getAddress().getHostAddress());
+        //client.send("You have connected");
+        System.out.println("got a web connection: " + client.getRemoteSocketAddress().getAddress().getHostAddress());
         //jServer.clientFactory.addWebClient(client);
 
         //Todo: Make clients a Class and make this and clientFactory use a method in clients to add a web or raw client

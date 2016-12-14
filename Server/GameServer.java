@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 /**
  * Created by Evan on 10/21/2016.
@@ -42,26 +41,36 @@ public class GameServer extends Server {
 
     @Override
     public void onMessage(ClientWorker clientWorker, String message) {
-        User user = (User)(clientWorker.clientData);
-        JSONObject jsonObject = new JSONObject(message);
-        String argument = jsonObject.getString("argument");
-        StringWriter stringWriter = new StringWriter();
-        if (argument.equals("...")) {
-            //...//
-            //To send back to client:
-            JSONWriter jsonWriter = new JSONWriter(stringWriter)
-                    .object()
-                    .key("argument")
-                    .value("...")
-                    .endObject();
-            //
+        try {
+            User user = (User)(clientWorker.clientData);
+            JSONObject jsonObject = new JSONObject(message);
+            String argument = jsonObject.getString("argument");
+            StringWriter stringWriter = new StringWriter();
+            //get a result from commands
+            String result = commands.orchestrateCommand(clientWorker, jsonObject);
+            //if the result is not empty, or the command executed successfully and has things to return,
+            //send the result back to the client
+            if (!result.equals("noreturnsuccsess") && !result.equals("")) clientWorker.sendMessage(result);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Terminating client connection for client: " + clientWorker);
+            clientWorker.forcedisconnect();
         }
 
-        String result = commands.orchastrateCommand(clientWorker, jsonObject);
-        if (!result.equals("noreturnsuccsess") && !result.equals("")) clientWorker.sendMessage(result);
-        if (!stringWriter.toString().equals("")) {
-            clientWorker.sendMessage(stringWriter.toString());
-        }
+//        if (argument.equals("...")) {
+//            //...//
+//            //To send back to client:
+//            JSONWriter jsonWriter = new JSONWriter(stringWriter)
+//                    .object()
+//                    .key("argument")
+//                    .value("...")
+//                    .endObject();
+//            //
+//        }
+        //        if (!stringWriter.toString().equals("")) {
+//            clientWorker.sendMessage(stringWriter.toString());
+//        }
     }
 
     @Override

@@ -69,7 +69,7 @@ public class User {
         //...//
         if (isAuthenticated) return authenticationstatus.Failure;
         HashMap<String, Object> result = Authenticate.signUp(name, securepass, email, "User");
-        if (!(boolean)result.get("result")) {
+        if ((boolean)result.get("result")) {
             this.name = (String)result.get("name");
             this.email = (String)result.get("email");
             this.rank = Rank.User;

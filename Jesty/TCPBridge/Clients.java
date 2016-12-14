@@ -46,7 +46,8 @@ public class Clients {
 
             clients.add(w);
             //threads.add(w);
-            new Thread(w).start();
+            w.t = new Thread(w);
+            w.t.start();
             w.connect();
             id ++;
         }

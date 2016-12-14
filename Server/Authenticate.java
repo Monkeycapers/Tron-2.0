@@ -86,23 +86,28 @@ public class Authenticate {
                 bufferedReader.close();
                 JSONObject jsonObject = new JSONObject(total);
                 JSONArray users = jsonObject.getJSONArray("users");
+                JSONObject user = new JSONObject();
+                user.put("name", name);
+                user.put("pass", pass);
+                user.put("email", email);
+                user.put("rank", rank);
+                users.put(user);
                 StringWriter stringWriter = new StringWriter();
                 
                 JSONObject jsonObject1 = new JSONObject();
                 jsonObject1.put("users", users);
                 System.out.println("JSonObject1 : " + jsonObject1.toString());
-                //System.out.println(jsonObject1.toString());
-//                PrintWriter out = new PrintWriter(new FileWriter(usersfile));
-//                JSONWriter writer = new JSONWriter(out).object()
-//                        .key("users")
-//                        .array().
+
+               PrintWriter out = new PrintWriter(new FileWriter(usersfile));
+               out.print(jsonObject1.toString());
+               out.close();
 
                 result.put("result", true);
                 return result;
             }
             else {
                 //User already exists, or an error occurred
-
+                //Todo: implemet reason why
                 //...//
                 result.put("result", false);
                 return result;
@@ -120,12 +125,20 @@ public class Authenticate {
 
     public static boolean checkRank (Rank rank, Rank minRank) {
         int i1 = 0, i2 = 0;
-        for (int i = 0; i < rankOrder.length -1; i++) {
-            if (rankOrder[i].equals(rank)) i1 = i;
-            if (rankOrder[i].equals(minRank)) i2 = i;
+        for (int i = 0; i < rankOrder.length; i++) {
+            if (rankOrder[i] == (rank)) {
+                i1 = i;
+            }
+            if (rankOrder[i] == (minRank)) {
+                i2 = i;
+            }
         }
-        //System.out.println(rank.toString() + ":" + i1);
-        //System.out.println(minRank.toString() + ":" + i2);
+//        System.out.println(rank.toString() + ":" + i1);
+//        System.out.println(minRank.toString() + ":" + i2);
+//
+//        for (int i = 0; i < rankOrder.length; i++) {
+//            System.out.println(i + "," + rankOrder[i]);
+//        }
         return (i2 <= i1);
     }
 }

@@ -12,6 +12,22 @@ import java.io.StringWriter;
 
 /**
  * Created by Evan on 12/13/2016.
+ *
+ * authenticates with the server
+ *
+ * MUST be currently unauthenticated
+ *
+ * Arguments: String User, String Pass OR byte[] SecureToken
+ * Returns Boolean success
+ *
+ * If TRUE, byte[] securetoken
+ * If FALSE, int reason
+ * Reason 0 --> Wrong pass or username (or invalid token)
+ * Reason 1 --> Cannot signin (server error)
+ * Reason 2 --> Banned --> String banreason
+ *
+ * Minimum rank: Guest
+ *
  */
 public class SignInCommand extends Command {
 

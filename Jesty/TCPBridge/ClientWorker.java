@@ -5,6 +5,7 @@ import org.java_websocket.WebSocket;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -32,6 +33,8 @@ public class ClientWorker implements Runnable {
     Server server;
 
     public Object clientData;
+
+    Thread t;
 
 
     public ClientWorker (int id, Socket socket, Server server) {
@@ -128,10 +131,40 @@ public class ClientWorker implements Runnable {
         server.onClose(this, 0);
         server.clients.remove(this);
     }
+
+    public void forcedisconnect() {
+        disconnect();
+        if (socketType == SocketType.RAW_SOCKET) {
+            try {
+                in.close();
+                out.close();
+                socket.close();
+                t.join();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            webSocket.close();
+        }
+    }
     //
     public void connect() {
         server.onOpen(this, 0);
     }
     //
 
+
+    @Override
+    public String toString() {
+        InetAddress address;
+        if (socketType == SocketType.RAW_SOCKET) {
+            address = socket.getInetAddress();
+        }
+        else {
+            address = socket.getInetAddress();
+        }
+        return "Socket type: " + socketType + ", ip:" +  address;
+    }
 }
