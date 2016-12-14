@@ -2,6 +2,8 @@ package Server;
 
 import Jesty.TCPBridge.ClientWorker;
 
+import java.util.HashMap;
+
 /**
  * Created by S199753733 on 12/6/2016.
  */
@@ -37,16 +39,53 @@ public class User {
 
     public authenticationstatus authenticate(String name, String securepass) {
         //...//
-        Authenticate.authenticate(name, securepass);
-        return authenticationstatus.Success;
+        if (isAuthenticated) return authenticationstatus.Failure;
+        HashMap<String, Object> result = Authenticate.authenticate(name, securepass);
+        if ((boolean)result.get("result")) {
+            this.name = (String)result.get("name");
+            this.email = (String)result.get("email");
+            this.rank = Rank.valueOf((String)result.get("rank"));
+            isAuthenticated = true;
+            return authenticationstatus.Success;
+        }
+        else {
+            int reason = (int)result.get("reason");
+            if (reason == 0) {
+                return authenticationstatus.NoUserOrPassword;
+            }
+            else if (reason == 2) {
+                return authenticationstatus.Banned;
+            }
+        }
+        return authenticationstatus.Failure;
     }
 
     public authenticationstatus authenticate(String securetoken) {
         //...//
-        return authenticationstatus.Success;
+        return authenticationstatus.Failure;
     }
 
     public authenticationstatus signup(String name, String securepass, String email) {
+        //...//
+        if (isAuthenticated) return authenticationstatus.Failure;
+        HashMap<String, Object> result = Authenticate.signUp(name, securepass, email, "User");
+        if (!(boolean)result.get("result")) {
+            this.name = (String)result.get("name");
+            this.email = (String)result.get("email");
+            this.rank = Rank.User;
+            isAuthenticated = true;
+            return authenticationstatus.Success;
+        }
+        else {
+            System.out.println(result.toString());
+//            int reason = (int)result.get("reason");
+//            if (reason == 0) {
+//                return authenticationstatus.InvalidPassword;
+//            }
+//            else if (reason == 2) {
+//                return authenticationstatus.Banned;
+//            }
+        }
         return authenticationstatus.Failure;
     }
 
@@ -64,6 +103,10 @@ public class User {
 
     public Lobby getCurrentLobby () {
         return currentLobby;
+    }
+
+    public boolean isAuthenticated() {
+        return isAuthenticated;
     }
 
     public boolean setCurrentLobby(Lobby lobby) {

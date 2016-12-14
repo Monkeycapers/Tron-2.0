@@ -4,6 +4,7 @@ package Server;
 import Jesty.Settings;
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Server;
+import Server.Commands.Commands;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
@@ -25,6 +26,8 @@ public class GameServer extends Server {
 
     ArrayList<User> users;
 
+    Commands commands;
+
     public GameServer(int raw_port, int web_port) {
         super(raw_port, web_port);
         users = new ArrayList<User>();
@@ -34,6 +37,7 @@ public class GameServer extends Server {
         Settings.setFile(new File("settings.txt"), defaults);
         Authenticate.setFile(new File("users.json"));
         Settings.load();
+        commands = new Commands();
     }
 
     @Override
@@ -41,25 +45,23 @@ public class GameServer extends Server {
         User user = (User)(clientWorker.clientData);
         JSONObject jsonObject = new JSONObject(message);
         String argument = jsonObject.getString("argument");
-
+        StringWriter stringWriter = new StringWriter();
         if (argument.equals("...")) {
             //...//
             //To send back to client:
-            StringWriter stringWriter = new StringWriter();
             JSONWriter jsonWriter = new JSONWriter(stringWriter)
                     .object()
                     .key("argument")
                     .value("...")
                     .endObject();
-            clientWorker.sendMessage(stringWriter.toString());
             //
         }
 
-        if (argument.equals("signin")) {
-            System.out.println("bup");
-            user.authenticate(jsonObject.getString("username"), jsonObject.getString("password"));
+        String result = commands.orchastrateCommand(clientWorker, jsonObject);
+        if (!result.equals("noreturnsuccsess") && !result.equals("")) clientWorker.sendMessage(result);
+        if (!stringWriter.toString().equals("")) {
+            clientWorker.sendMessage(stringWriter.toString());
         }
-
     }
 
     @Override

@@ -7,7 +7,7 @@ public enum authenticationstatus {
     //General
     Success, Failure,
     //Signin
-    NoUser, NoPassword, WrongToken,
+    NoUserOrPassword, WrongToken, Banned,
     //Signup
     UserAlreadyExists, InvalidPassword
 }

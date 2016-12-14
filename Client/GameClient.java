@@ -20,6 +20,7 @@ public class GameClient extends Jesty.TCPBridge.Client {
     @Override
     public void onMessage(String message) {
         JSONObject jsonObject = new JSONObject(message);
+        System.out.println(jsonObject.toString());
         String argument = jsonObject.getString("argument");
 
         if (argument.equals("")) {
