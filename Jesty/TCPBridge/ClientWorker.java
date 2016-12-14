@@ -39,7 +39,7 @@ public class ClientWorker implements Runnable {
         this.socket = socket;
         socketType = SocketType.RAW_SOCKET;
         this.server = server;
-        System.out.println(server);
+        //System.out.println(server);
     }
 
     public ClientWorker(int id, WebSocket socket, Server server) {
@@ -106,6 +106,9 @@ public class ClientWorker implements Runnable {
         if (socketType == SocketType.RAW_SOCKET) {
             try {
                 out.writeUTF((String)(data));
+            }
+            catch (SocketException e) {
+                disconnect();
             }
             catch (IOException e) {
                 e.printStackTrace();

@@ -34,10 +34,22 @@ public class testServer extends Server {
         testServer test =  new testServer(16000, 8080);
         test.start();
         while (true) {
-            String in = new Scanner(System.in).nextLine();
-            for (ClientWorker w: test.clients.getList()) {
-                w.sendMessage(in);
+            try {
+                String in = new Scanner(System.in).nextLine();
+                if (in.equals("c")) {
+                    System.out.println(test.clients.getList().size());
+                }
+                else {
+                    for (ClientWorker w: test.clients.getList()) {
+                        w.sendMessage(in);
+                    }
+                }
+
             }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
