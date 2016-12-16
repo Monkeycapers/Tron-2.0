@@ -25,7 +25,7 @@ public class Authenticate {
         usersfile = file;
     }
 
-    public static HashMap<String, Object> authenticate(String name, String pass) {
+    public static HashMap<String, Object> authenticate(String name, String pass, boolean unsecure) {
         HashMap<String, Object> result = new HashMap<>();
         try {
             String in = "";
@@ -41,11 +41,12 @@ public class Authenticate {
                 //JSONObject user = new JSONObject((String)u.toString().replaceAll("=", ":"));
                 //
                 if (user.getString("name").equals(name)) {
-                    if (user.getString("pass").equals(pass)) {
+                    if (user.getString("pass").equals(pass) || unsecure) {
                         if (user.getString("rank").equals("Banned")) {
                             //banned (bad boy!)
                             result.put("result", false);
                             result.put("reason", 2);
+                            result.put("banreason", user.getString("banreason"));
                             return result;
                         }
                         System.out.println("true");
@@ -75,7 +76,7 @@ public class Authenticate {
         HashMap<String, Object> result = new HashMap<>();
         try {
             //Check if the user does not exist
-            HashMap<String, Object> checkisalreadyauth = authenticate(name, pass);
+            HashMap<String, Object> checkisalreadyauth = authenticate(name, pass, false);
             if (checkisalreadyauth.containsKey("reason")) {
                 //User does not exist
                 //Write the user details to file
@@ -123,6 +124,116 @@ public class Authenticate {
         return result;
     }
 
+    public static authenticationstatus update(User user) {
+        try {
+            String in = "";
+            String total = "";
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(usersfile));
+            while ((in = bufferedReader.readLine()) != null) {total += in;}
+            bufferedReader.close();
+            JSONObject jsonObject = new JSONObject(total);
+            System.out.println("jsonobject: " + jsonObject);
+            JSONArray users = jsonObject.getJSONArray("users");
+            int index = 0;
+            int indexOfUser = -1;
+            String pass = "";
+            for (Object o: users) {
+                JSONObject j = (JSONObject)o;
+                //System.out.println("J = " + o.getClass().getName());
+                if (j.getString("name").equals(user.getName())) {
+                    indexOfUser = index;
+                    pass = j.getString("pass");
+                }
+                index++;
+            }
+            if (indexOfUser != -1) {
+                users.remove(indexOfUser);
+                JSONObject juser = new JSONObject();
+                juser.put("name", user.getName());
+                juser.put("pass", pass);
+                juser.put("email", user.getEmail());
+                juser.put("rank", user.getRank());
+                if (user.getRank() == Rank.Banned) {
+                    juser.put("banreason", user.getBanReason());
+                }
+                users.put(juser);
+            }
+
+
+            StringWriter stringWriter = new StringWriter();
+            new JSONWriter(stringWriter).object()
+                    .key("users")
+                    .value(users)
+                    .endObject();
+            System.out.println("Out: " + stringWriter.toString());
+            PrintWriter out = new PrintWriter(new FileWriter(usersfile));
+            out.print(stringWriter.toString());
+            out.close();
+            return authenticationstatus.Success;
+            //JSONObject juser = new JSONObject();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return authenticationstatus.Failure;
+    }
+    public static authenticationstatus update(OfflineUser user) {
+        try {
+            String in = "";
+            String total = "";
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(usersfile));
+            while ((in = bufferedReader.readLine()) != null) {total += in;}
+            bufferedReader.close();
+            JSONObject jsonObject = new JSONObject(total);
+            System.out.println("jsonobject: " + jsonObject);
+            JSONArray users = jsonObject.getJSONArray("users");
+            int index = 0;
+            int indexOfUser = -1;
+            String pass = "";
+            for (Object o: users) {
+                JSONObject j = (JSONObject)o;
+                //System.out.println("J = " + o.getClass().getName());
+                if (j.getString("name").equals(user.name)) {
+                    indexOfUser = index;
+                    pass = j.getString("pass");
+                }
+                index++;
+            }
+            if (indexOfUser != -1) {
+                users.remove(indexOfUser);
+                JSONObject juser = new JSONObject();
+                juser.put("name", user.name);
+                juser.put("pass", pass);
+                juser.put("email", user.email);
+                juser.put("rank", user.rank);
+                if (user.rank == Rank.Banned) {
+                    juser.put("banreason", user.banreason);
+                }
+                users.put(juser);
+            }
+            else {
+                return authenticationstatus.Failure;
+            }
+
+
+            StringWriter stringWriter = new StringWriter();
+            new JSONWriter(stringWriter).object()
+                    .key("users")
+                    .value(users)
+                    .endObject();
+            //System.out.println("Out: " + stringWriter.toString());
+            PrintWriter out = new PrintWriter(new FileWriter(usersfile));
+            out.print(stringWriter.toString());
+            out.close();
+            return authenticationstatus.Success;
+            //JSONObject juser = new JSONObject();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return authenticationstatus.Failure;
+    }
+
     public static boolean checkRank (Rank rank, Rank minRank) {
         int i1 = 0, i2 = 0;
         for (int i = 0; i < rankOrder.length; i++) {
@@ -133,12 +244,26 @@ public class Authenticate {
                 i2 = i;
             }
         }
-//        System.out.println(rank.toString() + ":" + i1);
-//        System.out.println(minRank.toString() + ":" + i2);
-//
-//        for (int i = 0; i < rankOrder.length; i++) {
-//            System.out.println(i + "," + rankOrder[i]);
-//        }
         return (i2 <= i1);
     }
+
+    //1: Rank1 is greater than rank2
+    //0: Rank1 is equal to rank2
+    //-1 Rank1 is smaller than rank2
+    public static int compareRanks (Rank rank1, Rank rank2) {
+        int i1 = 0, i2 = 0;
+        for (int i = 0; i < rankOrder.length; i++) {
+            if (rankOrder[i] == (rank1)) {
+                i1 = i;
+            }
+            if (rankOrder[i] == (rank2)) {
+                i2 = i;
+            }
+        }
+
+        if (i1 > i2) return 1;
+        if (i1 < i2) return -1;
+        return 0;
+    }
+
 }

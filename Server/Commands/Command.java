@@ -2,6 +2,7 @@ package Server.Commands;
 
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Clients;
+import Server.GameServer;
 import Server.Rank;
 import Server.User;
 import org.json.JSONObject;
@@ -23,6 +24,6 @@ public abstract class Command {
 
     Rank minrank;
 
-    public abstract String docommand(ClientWorker clientWorker, Clients clients, JSONObject input, User user);
+    public abstract String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user);
 
 }

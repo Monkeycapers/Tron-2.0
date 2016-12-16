@@ -5,6 +5,7 @@ import Jesty.Settings;
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Server;
 import Server.Commands.Commands;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
@@ -36,7 +37,7 @@ public class GameServer extends Server {
         Settings.setFile(new File("settings.txt"), defaults);
         Authenticate.setFile(new File("users.json"));
         Settings.load();
-        commands = new Commands();
+        commands = new Commands(this);
     }
 
     @Override
@@ -52,7 +53,12 @@ public class GameServer extends Server {
             //send the result back to the client
             if (!result.equals("noreturnsuccsess") && !result.equals("")) clientWorker.sendMessage(result);
         }
+        catch (JSONException e) {
+            System.out.println("invalid format: " + e.getMessage());
+            //Todo: send this back to the client
+        }
         catch (Exception e) {
+            //Protect the server, and kill the connection
             e.printStackTrace();
             System.out.println("Terminating client connection for client: " + clientWorker);
             clientWorker.forcedisconnect();
@@ -94,6 +100,28 @@ public class GameServer extends Server {
             }
         }
         return null;
+    }
+
+    public void kick (User user, String reason) {
+        ClientWorker targetClientWorker = user.clientWorker;
+        users.remove(user);
+        user = new User(targetClientWorker);
+        targetClientWorker.clientData = user;
+        //Todo
+        StringWriter stringWriter = new StringWriter();
+        new JSONWriter(stringWriter).object()
+                .key("argument").value("kicked")
+                .key("reason").value(reason)
+                .endObject();
+        targetClientWorker.sendMessage(stringWriter.toString());
+        //targetClientWorker.sendMessage("...You've been kicked for : ...")
+    }
+
+    public void ban(User user, String reason) {
+        kick(user, reason);
+        //Todo: handle IO errors
+        user.setBanReason(reason);
+        user.updateRank(Rank.Banned);
     }
 
 

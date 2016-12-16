@@ -21,11 +21,11 @@ public class GameClient extends Jesty.TCPBridge.Client {
     public void onMessage(String message) {
         JSONObject jsonObject = new JSONObject(message);
         System.out.println(jsonObject.toString());
-        String argument = jsonObject.getString("argument");
+        //String argument = jsonObject.getString("argument");
 
-        if (argument.equals("")) {
+        //if (argument.equals("")) {
             //...//
-        }
+        //}
 
     }
 

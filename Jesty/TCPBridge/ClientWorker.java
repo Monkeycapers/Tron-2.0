@@ -72,11 +72,7 @@ public class ClientWorker implements Runnable {
         isRunning = true;
         while (socketType == SocketType.RAW_SOCKET && isRunning &&  ! getMessage()) { }
 
-        if (socketType == SocketType.RAW_SOCKET) {
-            //Client disconnect
-            disconnect();
-        }
-
+        forcedisconnect();
     }
 
     //Websocket calls this
@@ -130,6 +126,7 @@ public class ClientWorker implements Runnable {
     public void disconnect() {
         server.onClose(this, 0);
         server.clients.remove(this);
+
     }
 
     public void forcedisconnect() {

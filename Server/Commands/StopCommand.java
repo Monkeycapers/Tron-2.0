@@ -3,6 +3,7 @@ package Server.Commands;
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Clients;
 import Server.Authenticate;
+import Server.GameServer;
 import Server.Rank;
 import Server.User;
 import org.json.JSONObject;
@@ -25,7 +26,7 @@ public class StopCommand extends Command {
     }
 
     @Override
-    public String docommand(ClientWorker clientWorker, Clients clients, JSONObject input, User user) {
+    public String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user) {
 
         //Fail safe: stop execution if rank is not what is expected
         assert Authenticate.checkRank(user.getRank(), minrank);

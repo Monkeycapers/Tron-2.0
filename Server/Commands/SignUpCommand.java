@@ -2,6 +2,7 @@ package Server.Commands;
 
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Clients;
+import Server.GameServer;
 import Server.Rank;
 import Server.User;
 import Server.authenticationstatus;
@@ -20,7 +21,7 @@ public class SignUpCommand extends Command {
         this.minrank = Rank.Guest;
     }
 
-    public String docommand(ClientWorker clientWorker, Clients clients, JSONObject input, User user) {
+    public String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user) {
         StringWriter stringWriter = new StringWriter();
         authenticationstatus status = user.signup(input.getString("username"), input.getString("password"), input.getString("email"));
         if (status == authenticationstatus.Success) {

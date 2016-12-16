@@ -3,6 +3,7 @@ package Server.Commands;
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Clients;
 import Server.Authenticate;
+import Server.GameServer;
 import Server.User;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -20,14 +21,18 @@ public class Commands {
 
     ArrayList<Command> commands;
 
-    Clients clients;
+    GameServer gameServer;
 
-    public Commands() {
+    public Commands(GameServer gameServer) {
         //Init the commands ArrayList
+        this.gameServer = gameServer;
         commands = new ArrayList<>();
         commands.add(new SignInCommand());
         commands.add(new SignUpCommand());
         commands.add(new StopCommand());
+        commands.add(new KickCommand());
+        commands.add(new UserInfo());
+        commands.add(new BanCommand());
     }
 
     public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {
@@ -41,10 +46,10 @@ public class Commands {
                 return stringWriter.toString();
             }
             if (command.doreturn) {
-                return command.docommand(clientWorker, clients, jsonObject, user);
+                return command.docommand(clientWorker, gameServer, jsonObject, user);
             }
             else {
-                command.docommand(clientWorker, clients, jsonObject, user);
+                command.docommand(clientWorker, gameServer, jsonObject, user);
                 return "noreturnsuccsess";
             }
         }

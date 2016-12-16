@@ -1,0 +1,13 @@
+{"argument":"signin", "username":"Evan", "password":"unsec"}
+
+{"argument":"signin", "username":"Evan2", "password":"unsec"}
+
+{"argument":"signup", "username":"Evan2", "password":"unsec", "email":"evanjesty@gmail.com"}
+
+{"argument":"stop"}
+
+{"argument":"kick", "user":"Evan2", "reason":"Kicked from the server"}
+
+{"argument":"userinfo", "type":true}
+
+{"argument":"ban", "user":"Evan2", "reason":"you're done kiddo"}

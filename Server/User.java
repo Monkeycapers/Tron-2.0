@@ -16,6 +16,8 @@ public class User {
     private Lobby currentLobby;
     public ClientWorker clientWorker;
 
+    private String banreason;
+
     public User(ClientWorker clientWorker) {
         //Default to an un-authenticated user
         this.name = "guest";
@@ -40,7 +42,7 @@ public class User {
     public authenticationstatus authenticate(String name, String securepass) {
         //...//
         if (isAuthenticated) return authenticationstatus.Failure;
-        HashMap<String, Object> result = Authenticate.authenticate(name, securepass);
+        HashMap<String, Object> result = Authenticate.authenticate(name, securepass, false);
         if ((boolean)result.get("result")) {
             this.name = (String)result.get("name");
             this.email = (String)result.get("email");
@@ -54,6 +56,7 @@ public class User {
                 return authenticationstatus.NoUserOrPassword;
             }
             else if (reason == 2) {
+                banreason = (String)result.get("banreason");
                 return authenticationstatus.Banned;
             }
         }
@@ -89,6 +92,11 @@ public class User {
         return authenticationstatus.Failure;
     }
 
+    public authenticationstatus updateRank(Rank rank) {
+        this.rank = rank;
+        return Authenticate.update(this);
+    }
+
     public Rank getRank() {
         return rank;
     }
@@ -114,5 +122,12 @@ public class User {
         return true;
     }
 
+    public String getBanReason() {
+        return banreason;
+    }
+
+    public void setBanReason(String reason) {
+            banreason = reason;
+    }
 
 }

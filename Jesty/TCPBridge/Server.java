@@ -47,10 +47,10 @@ public abstract class Server {
         }
         try {
             //Cut of the PC name part of the ip address
-            System.out.println("The IP Adress of the Server: " + InetAddress.getLocalHost().toString().split("/")[1]);
+            System.out.println("The IP Address of the Server: " + InetAddress.getLocalHost().toString().split("/")[1]);
         }
         catch (Exception e) {
-            System.out.println("The IP Adress of the Server: localhost");
+            System.out.println("The IP Address of the Server: localhost");
         }
         //
     }
