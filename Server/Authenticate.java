@@ -42,7 +42,7 @@ public class Authenticate {
                 //
                 if (user.getString("name").equals(name)) {
                     if (user.getString("pass").equals(pass) || unsecure) {
-                        if (user.getString("rank").equals("Banned")) {
+                        if (user.getString("rank").equals("Banned") && !unsecure) {
                             //banned (bad boy!)
                             result.put("result", false);
                             result.put("reason", 2);

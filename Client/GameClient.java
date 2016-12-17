@@ -1,5 +1,7 @@
 package Client;
 
+import Client.Commands.Commands;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -9,8 +11,11 @@ import org.json.JSONObject;
  */
 public class GameClient extends Jesty.TCPBridge.Client {
 
+    Commands commands;
+
     public GameClient(String hostName, int portNumber) {
         super(hostName, portNumber);
+        commands = new Commands(this);
     }
 
     public GameClient() {
@@ -19,8 +24,20 @@ public class GameClient extends Jesty.TCPBridge.Client {
 //
     @Override
     public void onMessage(String message) {
-        JSONObject jsonObject = new JSONObject(message);
-        System.out.println(jsonObject.toString());
+        try {
+            JSONObject jsonObject = new JSONObject(message);
+            System.out.println(jsonObject.toString());
+
+            String result = commands.orchestrateCommand(jsonObject);
+            System.out.println(result);
+        }
+        catch (JSONException e) {
+            System.out.println("invalid format: " + e.getMessage());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
         //String argument = jsonObject.getString("argument");
 
         //if (argument.equals("")) {

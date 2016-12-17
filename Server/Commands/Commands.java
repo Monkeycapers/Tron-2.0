@@ -33,6 +33,8 @@ public class Commands {
         commands.add(new KickCommand());
         commands.add(new UserInfo());
         commands.add(new BanCommand());
+        commands.add(new PromoteCommand());
+        commands.add(new UserExistsCommand());
     }
 
     public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {

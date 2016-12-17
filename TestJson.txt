@@ -11,3 +11,5 @@
 {"argument":"userinfo", "type":true}
 
 {"argument":"ban", "user":"Evan2", "reason":"you're done kiddo"}
+
+{"argument":"promote", "user":"Evan2", "rank":"User"}

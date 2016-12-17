@@ -26,6 +26,7 @@ public class UserInfo extends Command {
         if (input.getBoolean("type")) {
             //Type 1: self info
             new JSONWriter(stringWriter).object()
+                    .key("argument").value("returnuserinfo")
                     .key("name").value(user.getName())
                     .key("email").value(user.getEmail())
                     .key("rank").value(user.getRank())

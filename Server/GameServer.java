@@ -26,7 +26,7 @@ public class GameServer extends Server {
 
     ArrayList<User> users;
 
-    Commands commands;
+    public Commands commands;
 
     public GameServer(int raw_port, int web_port) {
         super(raw_port, web_port);
@@ -54,7 +54,8 @@ public class GameServer extends Server {
             if (!result.equals("noreturnsuccsess") && !result.equals("")) clientWorker.sendMessage(result);
         }
         catch (JSONException e) {
-            System.out.println("invalid format: " + e.getMessage());
+            e.printStackTrace();
+           // System.out.println("invalid format: " + e.getMessage());
             //Todo: send this back to the client
         }
         catch (Exception e) {
