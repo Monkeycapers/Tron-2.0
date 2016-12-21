@@ -3,6 +3,7 @@ package Client.Commands;
 import Client.GameClient;
 import Client.showSetupGui;
 import Client.signinController;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -19,7 +20,14 @@ public class returnSignInCommand extends Command {
     public String docommand(GameClient gameClient, JSONObject input) {
             if (input.getBoolean("success")) {
                 System.out.println("authed...");
-                //Todo: setup the next gui
+                //Todo: get the rank from userInfo, to see what the user's rank is
+                gameClient.isHighRank = true;
+                JSONArray jsonArray = input.getJSONArray("users");
+               // showSetupGui.addUser();
+                showSetupGui.showOutOfGameMenu();
+                showSetupGui.addUsers(jsonArray.toList());
+                //showSetupGui.loginloader.getController().
+                //((signinController)(showSetupGui.loginloader.getController())).hide();
             }
             else {
                 int reason = input.getInt("reason");
@@ -28,7 +36,7 @@ public class returnSignInCommand extends Command {
                 if (reason == 2) {
                     message = "Banned for: " + input.getString("banreason");
                 }
-                ((signinController)(showSetupGui.loader.getController())).updateSignInOrSignUpError(message);
+                ((signinController)(showSetupGui.loginloader.getController())).updateSignInOrSignUpError(message);
             }
             return "";
     }

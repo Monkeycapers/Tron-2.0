@@ -11,17 +11,17 @@ import java.util.Scanner;
 public class test {
     public static GameClient client;
     public static void main (String[] args) {
-       client =  new GameClient("localhost", 16000);
-       client.start();
-        showSetupGui.showSetupGui();
+//       client =  new GameClient("localhost", 16000);
+//       client.start();
+//        showSetupGui.showSetupGui();
        GameServer gameServer =  new GameServer(16000, 8080);
        gameServer.start();
 
-        try {Thread.sleep(100);}catch (Exception e) { }
-        while (true) {
-            System.out.print(">");
-            client.sendMessage(new Scanner(System.in).nextLine());
-        }
+//        try {Thread.sleep(100);}catch (Exception e) { }
+//        while (true) {
+//            System.out.print(">");
+//            client.sendMessage(new Scanner(System.in).nextLine());
+//        }
         //new Thread(new Rayc()).start();
     }
 }

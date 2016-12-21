@@ -1,5 +1,6 @@
 package Jesty.test;
 
+import Jesty.TCPBridge.Client;
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Server;
 
@@ -16,9 +17,9 @@ public class testServer extends Server {
     @Override
     public void onMessage(ClientWorker clientWorker, String message) {
         System.out.println("From client:" + message);
-        for (ClientWorker w: clients.getList()) {
-            w.sendMessage(message);
-        }
+//        for (ClientWorker w: clients.getList()) {
+//            w.sendMessage(message);
+//        }
     }
 
     @Override
@@ -53,4 +54,9 @@ public class testServer extends Server {
         }
     }
 
+    public void sendMessage(String s) {
+        for (ClientWorker clientWorker: clients.getList()) {
+            clientWorker.sendMessage(s);
+        }
+    }
 }

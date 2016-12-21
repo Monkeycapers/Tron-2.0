@@ -149,6 +149,7 @@ public class signinController implements Initializable {
     }
 
     public void updateSignInOrSignUpError(String message) {
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {

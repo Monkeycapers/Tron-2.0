@@ -20,6 +20,7 @@ public class returnSignUpCommand extends Command {
         if (input.getBoolean("success")) {
             System.out.println("authed...");
             //Todo: setup the next gui
+            showSetupGui.showOutOfGameMenu();
         }
         else {
             int reason = input.getInt("reason");
@@ -28,7 +29,7 @@ public class returnSignUpCommand extends Command {
             if (reason == 2) {
                 message = "Banned for: " + input.getString("banreason");
             }
-            ((signinController)(showSetupGui.loader.getController())).updateSignInOrSignUpError(message);
+            ((signinController)(showSetupGui.loginloader.getController())).updateSignInOrSignUpError(message);
         }
         return "";
     }

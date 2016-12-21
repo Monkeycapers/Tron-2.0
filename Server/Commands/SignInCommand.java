@@ -49,9 +49,14 @@ public class SignInCommand extends Command {
         else {
             authenticationstatus status = user.authenticate(input.getString("username"), input.getString("password"));
             if (status == authenticationstatus.Success) {
+                //Authenticated successfully
                 new JSONWriter(stringWriter).object()
                         .key("argument").value("returnsignin")
-                        .key("success").value(true).endObject();
+                        .key("success").value(true)
+                        .key("users").value(gameServer.getUserList().toArray())
+                        .endObject();
+                //Add to general chat
+                gameServer.chatContexts.doChatMessage(gameServer, user, "general", " has signed in!");
             }
             else if (status == authenticationstatus.Banned) {
                 new JSONWriter(stringWriter).object()

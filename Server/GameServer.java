@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Evan on 10/21/2016.
@@ -26,6 +27,8 @@ public class GameServer extends Server {
 
     ArrayList<User> users;
 
+    public ChatContexts chatContexts;
+
     public Commands commands;
 
     public GameServer(int raw_port, int web_port) {
@@ -38,6 +41,8 @@ public class GameServer extends Server {
         Authenticate.setFile(new File("users.json"));
         Settings.load();
         commands = new Commands(this);
+        chatContexts = new ChatContexts();
+        chatContexts.addNewContext(new GeneralChat());
     }
 
     @Override
@@ -92,6 +97,8 @@ public class GameServer extends Server {
         User user = new User(clientWorker);
         users.add(user);
         clientWorker.clientData = user;
+
+
     }
 
     public User getUserByName(String name) {
@@ -124,6 +131,27 @@ public class GameServer extends Server {
         user.setBanReason(reason);
         user.updateRank(Rank.Banned);
     }
+    //Todo: I have users for a reason....
+    public void sendToAll (String message){
+        for (ClientWorker w: clients.getList()) {
+            w.sendMessage( message);
+        }
+    }
 
-
+    public void sendToAll (Rank minRank, String message){
+        for (ClientWorker w: clients.getList()) {
+            if (Authenticate.checkRank(((User)w.clientData).getRank(), minRank)) {
+                w.sendMessage( message);
+            }
+        }
+    }
+    //
+    public List<String> getUserList () {
+        List<String> userlist = new ArrayList<>();
+        for (User user: users) {
+            if (Authenticate.checkRank(user.getRank(), Rank.User))
+            userlist.add("[" + user.getRank() + "] " + user.getName());
+        }
+        return userlist;
+    }
 }

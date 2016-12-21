@@ -1,0 +1,33 @@
+package Server;
+
+import org.json.JSONWriter;
+
+import java.io.StringWriter;
+
+/**
+ * Created by S199753733 on 12/21/2016.
+ */
+public class GeneralChat extends ChatContext {
+
+    public GeneralChat () {
+        this.name = "general";
+    }
+
+    @Override
+    public void sendMessage(GameServer gameServer, String message, User user) {
+        //Send the message to all users
+        StringWriter stringWriter = new StringWriter();
+        new JSONWriter(stringWriter).object()
+                .key("argument").value("chatmessage")
+                .key("name").value(name)
+                .key("message").value(genMessage(message, user))
+                .key("displayname").value("General")
+                .endObject();
+        gameServer.sendToAll(Rank.User, stringWriter.toString());
+    }
+    //Format the message
+    public String genMessage(String message, User user) {
+        return "<" + user.getRank().toString() + ">" + " " + user.getName() + " " + message;
+    }
+
+}

@@ -25,7 +25,7 @@ public class loginGuiCheckUserExistsCommand extends Client.Commands.Command {
         else {
             message = "✘ is not available :(";
         }
-        ((signinController)(showSetupGui.loader.getController())).updateCheckIfUserExistsField(message, isGood);
+        ((signinController)(showSetupGui.loginloader.getController())).updateCheckIfUserExistsField(message, isGood);
         return "";
     }
 }

@@ -28,6 +28,7 @@ public class Commands {
         commands.add(new loginGuiCheckUserExistsCommand());
         commands.add(new returnSignInCommand());
         commands.add(new returnSignUpCommand());
+        commands.add(new ChatMessageCommand());
     }
 
     public String orchestrateCommand(JSONObject jsonObject) {

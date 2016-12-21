@@ -35,6 +35,7 @@ public class Commands {
         commands.add(new BanCommand());
         commands.add(new PromoteCommand());
         commands.add(new UserExistsCommand());
+        commands.add(new ChatMessageCommand());
     }
 
     public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {

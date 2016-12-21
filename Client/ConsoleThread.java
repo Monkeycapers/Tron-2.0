@@ -12,7 +12,7 @@ public class ConsoleThread implements Runnable {
         try {Thread.sleep(100);}catch (Exception e) { }
         while (true) {
             System.out.print(">");
-            showSetupGui.client.sendMessage(new Scanner(System.in).nextLine());
+            showSetupGui.testServer.sendMessage(new Scanner(System.in).nextLine());
         }
     }
 }
