@@ -130,4 +130,7 @@ public class User {
             banreason = reason;
     }
 
+    public String chatFormatDisplay() {
+        return "[" + rank + "] " + name;
+    }
 }

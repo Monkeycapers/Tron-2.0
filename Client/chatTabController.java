@@ -28,13 +28,16 @@ public class chatTabController implements Initializable {
 
     String name = "";
 
+    public int pendingMessageCount = 0;
+
+    public String lastDisplayName = "";
+
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         System.out.println("hellow world");
                 chatTextField.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-
                 TextField src = ((TextField)(event.getSource()));
                 System.out.println("handling: " + src.getText());
                 showSetupGui.handleChatMessage(name, src.getText());
@@ -42,4 +45,13 @@ public class chatTabController implements Initializable {
             }
         });
     }
+
+    public int addPendingMessage() {
+        pendingMessageCount = pendingMessageCount + 1;
+        System.out.println("Pending messages: " + pendingMessageCount);
+        return pendingMessageCount;
+    }
+
+
+
 }

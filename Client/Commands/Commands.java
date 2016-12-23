@@ -29,6 +29,7 @@ public class Commands {
         commands.add(new returnSignInCommand());
         commands.add(new returnSignUpCommand());
         commands.add(new ChatMessageCommand());
+        commands.add(new UpdateUsersCommand());
     }
 
     public String orchestrateCommand(JSONObject jsonObject) {

@@ -2,6 +2,8 @@ package Client;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -15,6 +17,7 @@ import org.json.JSONWriter;
 
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 /**
@@ -35,10 +38,13 @@ public class serverListController implements Initializable {
     @FXML
     ListView userListView;
 
+    HashMap<Tab, chatTabController> tabControllerHashMap;
+
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         System.out.println("Init Server List Gui");
+        tabControllerHashMap = new HashMap<>();
 //        chatTabPane.getTabs().add(getNewTab("Wow!", "Wow"));
 //        chatTabPane.getTabs().add(getNewTab("much", "lol"));
 //        chatTabPane.getTabs().add(getNewTab("panes", "bup"));
@@ -57,6 +63,12 @@ public class serverListController implements Initializable {
             pmItem.setOnAction(event -> {
                 String item = cell.getItem();
                 // code to pm a user
+                StringWriter stringWriter = new StringWriter();
+                new JSONWriter(stringWriter).object()
+                        .key("argument").value("pmuser")
+                        .key("name").value(item)
+                        .endObject();
+                showSetupGui.client.sendMessage(stringWriter.toString());
             });
             contextMenu.getItems().addAll(pmItem);
 
@@ -98,6 +110,19 @@ public class serverListController implements Initializable {
             });
             return cell ;
         });
+
+        chatTabPane.getSelectionModel().selectedItemProperty().addListener(
+                new ChangeListener<Tab>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Tab> ov, Tab t, Tab t1) {
+                        System.out.println("Tab Selection changed");
+                        chatTabController controller = tabControllerHashMap.get(t1);
+                        controller.pendingMessageCount = 0;
+                        if (t1 != null  && controller.lastDisplayName != null)
+                        t1.setText(controller.lastDisplayName);
+                    }
+                }
+        );
 //        generalTextField.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
 //
 //            @Override
@@ -117,7 +142,10 @@ public class serverListController implements Initializable {
         try {
             tab = fxmlLoader.load();
             tab.setText(displayname);
-            ((chatTabController)(fxmlLoader.getController())).name = name;
+            chatTabController controller = fxmlLoader.getController();
+            controller.name = name;
+            controller.lastDisplayName = displayname;
+            tabControllerHashMap.put(tab, fxmlLoader.getController());
             showSetupGui.addChatTab(name, fxmlLoader.getController());
         }
         catch (Exception e) {
@@ -127,8 +155,8 @@ public class serverListController implements Initializable {
     }
 
     public void addNewTab(String name, String displayname) {
-
-        chatTabPane.getTabs().add(getNewTab(name, displayname));
+        Tab tab = getNewTab(name, displayname);
+        chatTabPane.getTabs().add(tab);
     }
 
     public void addUser(String text) {

@@ -17,3 +17,7 @@
 //Server to client
 
 {"argument":"chatmessage", "name":"notcurrentlyinused", "displayname":"aDisplayName", "message":"AMessage"}
+
+{"argument":"chatmessage", "name":"notcurrentlyinused1", "displayname":"Chat room1", "message":"AMessage"}
+
+{"argument":"chatmessage", "name":"notcurrentlyinused2", "displayname":"Chat room2", "message":"AMessage"}

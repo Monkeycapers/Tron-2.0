@@ -17,6 +17,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -61,14 +62,12 @@ public class showSetupGui extends Application {
             client =  new GameClient("localhost", 16000);
             client.start();
 
-            //showSetupGui.showSetupGui();
 //            GameServer gameServer =  new GameServer(16000, 8080);
 //            gameServer.start();
 
 //            testServer = new testServer(16000, 8080);
 //            testServer.start();
 
-            //new Thread(new Rayc()).start();
             // Load root layout from fxml file.
             loginloader = new FXMLLoader();
             loginloader.setLocation(showSetupGui.class.getResource("signin.fxml"));
@@ -79,7 +78,7 @@ public class showSetupGui extends Application {
             outOfMenuLoader.setLocation(showSetupGui.class.getResource("outofmenu.fxml"));
             outOfMenuLayout = (Pane) outOfMenuLoader.load();
 
-             //Show the scene containing the root layout.
+            // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
             stage = primaryStage;
             stage.setScene(scene);
@@ -138,27 +137,38 @@ public class showSetupGui extends Application {
     }
 
     public static void pushMessage(String name, String displayName, String message) {
-        if (!chatTabHashMap.containsKey(name)) {
+
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    serverListController serverList = (serverListController) outOfMenuLoader.getController();
-                    serverList.addNewTab(name, displayName);
-                    TextArea textArea = chatTabHashMap.get(name).chatTextArea;
-                    if (textArea.getText().equals("")) {
-                        textArea.setText(message);
+                        serverListController serverList = (serverListController) outOfMenuLoader.getController();
+
+                        if (!chatTabHashMap.containsKey(name)) {
+                            serverList.addNewTab(name, displayName);
+                        }
+                        chatTabController chattab = chatTabHashMap.get(name);
+                        TextArea textArea = chattab.chatTextArea;
+                        if (textArea.getText().equals("")) {
+                            textArea.setText(message);
+                        }
+                        else {
+                            textArea.setText(textArea.getText() + "\n" + message);
+                        }
+                    chattab.lastDisplayName = displayName;
+                    for (Tab tab: serverList.chatTabPane.getTabs()) {
+                        System.out.println("Tab text: " + tab.getText());
+                        System.out.println(tab.getText().startsWith(displayName));
+                        if (tab.getText().startsWith(displayName)) {
+                            if (!tab.isSelected()) tab.setText(displayName + " " + (chattab.addPendingMessage()));
+                        }
                     }
-                    else {
-                        textArea.setText(textArea.getText() + "\n" + message);
                     }
-                }
             });
-        }
-        else {
-            chatTabHashMap.get(name).chatTextArea.setText(chatTabHashMap.get(name).chatTextArea.getText() + "\n" + message);
-        }
-        //chatTabHashMap.get(name).chatTextArea.setText(chatTabHashMap.get(name).chatTextArea.getText() + "\n" + message);
     }
+
+
+        //chatTabHashMap.get(name).chatTextArea.setText(chatTabHashMap.get(name).chatTextArea.getText() + "\n" + message);
+
 
     public static void addUser(String text) {
         Platform.runLater(new Runnable() {

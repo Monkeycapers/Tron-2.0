@@ -89,6 +89,20 @@ public class GameServer extends Server {
     public void onClose(ClientWorker clientWorker, int code) {
         User user = (User)(clientWorker.clientData);
         users.remove(user);
+        if (Authenticate.checkRank(user.getRank(), Rank.User)) {
+            //System.out.println("sending leave message");
+            ((GeneralChat)(chatContexts.getContext("general"))).userLeftMessage(this, user);
+        }
+        //Tell the clients to add the user to their user list
+        StringWriter writer2 = new StringWriter();
+        new JSONWriter(writer2).object()
+                .key("argument").value("updateusers")
+                .key("name").value("general")
+                .key("type").value("remove")
+                .key("user").value(user.chatFormatDisplay())
+                .endObject();
+        //Don't need to use send to peers since the user has already disconnected
+        sendToAll(Rank.User, writer2.toString());
         //user.getCurrentLobby().removeUser(user);
     }
 
@@ -103,7 +117,7 @@ public class GameServer extends Server {
 
     public User getUserByName(String name) {
         for (User u: users) {
-            if (u.getName().equals(name)) {
+            if (u.getName().equals(name) || u.chatFormatDisplay().equals(name)) {
                 return u;
             }
         }
@@ -139,9 +153,17 @@ public class GameServer extends Server {
     }
 
     public void sendToAll (Rank minRank, String message){
-        for (ClientWorker w: clients.getList()) {
-            if (Authenticate.checkRank(((User)w.clientData).getRank(), minRank)) {
-                w.sendMessage( message);
+        for (User u: users) {
+            if (Authenticate.checkRank(u.getRank(), minRank)) {
+                u.clientWorker.sendMessage(message);
+            }
+        }
+    }
+    //Send to all except the user
+    public void sendToPeers (Rank minRank, User user, String message) {
+        for (User u: users) {
+            if ((u != user) && Authenticate.checkRank(u.getRank(), minRank)) {
+                u.clientWorker.sendMessage(message);
             }
         }
     }
