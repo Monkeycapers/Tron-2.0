@@ -96,22 +96,13 @@ public class GameServer extends Server {
         chatContexts.removeUser(user);
         Lobby lobby = user.getCurrentLobby();
         if (lobby != null) {
-            if (lobby.onClose(user)) {
-                try {
-                    lobby.isRunning = false;
-                    lobby.thread.join();
-                    lobbys.removeLobby(lobby);
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            lobbys.removeUser(lobby, user);
         }
         if (Authenticate.checkRank(user.getRank(), Rank.User)) {
             //System.out.println("sending leave message");
             ((GeneralChat)(chatContexts.getContext("general"))).userLeftMessage(this, user);
         }
-        //Tell the clients to add the user to their user list
+        //Tell the clients to remove the user from their user list
         StringWriter writer2 = new StringWriter();
         new JSONWriter(writer2).object()
                 .key("argument").value("updateusers")
@@ -144,10 +135,13 @@ public class GameServer extends Server {
 
     public void kick (User user, String reason) {
         ClientWorker targetClientWorker = user.clientWorker;
-        users.remove(user);
+        onClose(targetClientWorker, 3);
+//        users.remove(user);
+        //Reconstruct the user
         user = new User(targetClientWorker);
         targetClientWorker.clientData = user;
-
+        users.add(user);
+        //Tell the user that they have been kicked
         StringWriter stringWriter = new StringWriter();
         new JSONWriter(stringWriter).object()
                 .key("argument").value("kicked")

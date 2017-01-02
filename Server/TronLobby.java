@@ -18,8 +18,6 @@ public class TronLobby extends Lobby {
 
     TronPlayer creator;
 
-    int maxPlayers;
-
     int mapWidth;
 
     int mapHeight;
@@ -49,7 +47,7 @@ public class TronLobby extends Lobby {
         TronPlayer creatorplayer = new TronPlayer(creator, directiontable[0], getNewStartingPoint(), colortable[0]);
         this.creator = creatorplayer;
         players.add(creatorplayer);
-        this.maxPlayers = maxPlayers;
+        this.maxSize = maxPlayers;
 
     }
 
@@ -225,7 +223,7 @@ public class TronLobby extends Lobby {
 
     @Override
     public boolean canConnect(User user) {
-        return (players.size() <= maxPlayers && !isPrivate);
+        return (players.size() <= maxSize && !isPrivate);
     }
 
     @Override

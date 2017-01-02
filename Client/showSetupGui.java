@@ -390,4 +390,18 @@ public class showSetupGui extends Application {
                 .endObject();
         showSetupGui.client.sendMessage(stringWriter.toString());
     }
+    //Wipe gui elements (This is used for ex if you are kicked and rejoin)
+    public static void clearAllGuiElements() {
+        chatTabHashMap = new HashMap<>();
+        lobbyListHashMap = new HashMap<>();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                serverListController serverList = (serverListController) outOfMenuLoader.getController();
+                serverList.userListView.getItems().clear();
+                serverList.tabControllerHashMap = new HashMap<Tab, chatTabController>();
+                serverList.chatTabPane.getTabs().clear();
+            }
+        });
+    }
 }

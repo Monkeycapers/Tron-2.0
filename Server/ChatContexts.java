@@ -48,4 +48,10 @@ public class ChatContexts {
             }
         }
     }
+
+    public void removeUser (ChatContext chatContext, User user) {
+        if (chatContext.removeUser(user)) {
+            removeContext(chatContext);
+        }
+    }
 }

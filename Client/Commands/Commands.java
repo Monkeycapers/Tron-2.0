@@ -33,6 +33,7 @@ public class Commands {
         commands.add(new CloseChatCommand());
         commands.add(new DrawCommand());
         commands.add(new returnLobbyListCommand());
+        commands.add(new KickedCommand());
     }
 
     public String orchestrateCommand(JSONObject jsonObject) {

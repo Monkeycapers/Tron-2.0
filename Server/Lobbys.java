@@ -42,7 +42,30 @@ public class Lobbys {
             if (lobby.onClose(user)) {
                 //Dissolve the lobby
                 removeLobby(lobby);
+                lobby.isRunning = false;
+                try {
+                    lobby.thread.join();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
+            }
+        }
+    }
+
+    public void removeUser(Lobby lobby, User user) {
+        if (lobby != null || user != null) {
+            if (lobby.onClose(user)) {
+                //Dissolve the lobby
+                removeLobby(lobby);
+                lobby.isRunning = false;
+                try {
+                    lobby.thread.join();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -50,5 +73,6 @@ public class Lobbys {
     public List<Lobby> getList() {
         return lobbys;
     }
+
 
 }

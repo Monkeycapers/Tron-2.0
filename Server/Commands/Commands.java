@@ -41,6 +41,8 @@ public class Commands {
         commands.add(new LobbyMessageCommand());
         commands.add(new CreateLobbyCommand());
         commands.add(new LobbyListCommand());
+        commands.add(new LeaveLobbyCommand());
+        commands.add(new SignOutCommand());
     }
 
     public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {

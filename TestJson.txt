@@ -6,7 +6,7 @@
 
 {"argument":"stop"}
 
-{"argument":"kick", "user":"Evan2", "reason":"Kicked from the server"}
+{"argument":"kick", "user":"bupdude", "reason":"Kicked from the server"}
 
 {"argument":"userinfo", "type":true}
 

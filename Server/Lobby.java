@@ -17,7 +17,7 @@ public abstract class Lobby implements Runnable {
 
     public int maxSize;
 
-    Thread thread;
+    public Thread thread;
 
     public void start() {
         isRunning = true;

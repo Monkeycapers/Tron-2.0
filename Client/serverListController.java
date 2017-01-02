@@ -88,7 +88,11 @@ public class serverListController implements Initializable {
             @Override
             public void handle(Event event) {
                 //Todo: send a signout message
-
+                StringWriter stringWriter = new StringWriter();
+                new JSONWriter(stringWriter).object()
+                        .key("argument").value("signout")
+                        .endObject();
+                showSetupGui.client.sendMessage(stringWriter.toString());
                 signOutMenu.hide();
             }
         });
@@ -182,11 +186,18 @@ public class serverListController implements Initializable {
                 new ChangeListener<Tab>() {
                     @Override
                     public void changed(ObservableValue<? extends Tab> ov, Tab t, Tab t1) {
-                        System.out.println("Tab Selection changed");
-                        chatTabController controller = tabControllerHashMap.get(t1);
-                        controller.pendingMessageCount = 0;
-                        if (t1 != null  && controller.lastDisplayName != null)
-                        t1.setText(controller.lastDisplayName);
+                        try {
+                            System.out.println("Tab Selection changed");
+                            chatTabController controller = tabControllerHashMap.get(t1);
+                            if (controller != null) {
+                                controller.pendingMessageCount = 0;
+                                if (t1 != null  && controller.lastDisplayName != null)
+                                    t1.setText(controller.lastDisplayName);
+                            }
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
         );
