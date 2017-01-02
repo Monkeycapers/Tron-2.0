@@ -7,13 +7,15 @@ import org.json.JSONObject;
  */
 public abstract class Lobby implements Runnable {
 
-    boolean isPrivate;
+    public boolean isPrivate;
 
-    String name;
+    public String name;
 
-    ChatContext chatContext;
+    public ChatContext chatContext;
 
-    boolean isRunning;
+    public boolean isRunning;
+
+    public int maxSize;
 
     Thread thread;
 
@@ -34,5 +36,7 @@ public abstract class Lobby implements Runnable {
 
     //Check if the User is eligible to connect
     public abstract boolean canConnect(User user);
+
+    public abstract int getPlayerCount();
 
 }

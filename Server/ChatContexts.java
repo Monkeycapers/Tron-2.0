@@ -23,9 +23,9 @@ public class ChatContexts {
 
     public ChatContext getContext (String name) {
         for (ChatContext chatContext: chatContexts) {
-            System.out.println("The name: " + name);
-            System.out.println("Is the chatContext null?" + (chatContext == null));
-            System.out.println("The chatContext name: " + chatContext.name);
+//            System.out.println("The name: " + name);
+//            System.out.println("Is the chatContext null?" + (chatContext == null));
+//            System.out.println("The chatContext name: " + chatContext.name);
             if (chatContext.name.equals(name)) {
                 return chatContext;
             }

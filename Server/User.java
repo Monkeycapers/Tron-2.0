@@ -7,7 +7,9 @@ import java.util.HashMap;
 /**
  * Created by S199753733 on 12/6/2016.
  */
-public class User {
+
+//Final means that the class cannot be extended, making it more secure
+public final class User {
 
     private String name;
     private String email;
@@ -27,17 +29,17 @@ public class User {
         this.clientWorker = clientWorker;
     }
 
-    public User(ClientWorker clientWorker, String name, String securepass) {
-        //...//
-        this.clientWorker = clientWorker;
-        authenticate(name, securepass);
-    }
-
-    public User(ClientWorker clientWorker, String securetoken) {
-        //...//
-        this.clientWorker = clientWorker;
-        authenticate(securetoken);
-    }
+//    public User(ClientWorker clientWorker, String name, String securepass) {
+//        //...//
+//        this.clientWorker = clientWorker;
+//        authenticate(name, securepass);
+//    }
+//
+//    public User(ClientWorker clientWorker, String securetoken) {
+//        //...//
+//        this.clientWorker = clientWorker;
+//        authenticate(securetoken);
+//    }
 
     public authenticationstatus authenticate(String name, String securepass) {
         //...//

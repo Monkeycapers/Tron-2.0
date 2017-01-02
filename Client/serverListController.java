@@ -24,6 +24,7 @@ import org.json.JSONWriter;
 import javax.swing.event.HyperlinkEvent;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
@@ -76,7 +77,8 @@ public class serverListController implements Initializable {
         showLobbyListMenu.setOnShown(new EventHandler<Event>() {
             @Override
             public void handle(Event event) {
-                //showSetupGui.showLobbyListGui();
+                showSetupGui.requestLobbyList();
+                showSetupGui.showAnotherLayout(showSetupGui.lobbyListLayout);
                 showLobbyListMenu.hide();
             }
         });
@@ -85,7 +87,8 @@ public class serverListController implements Initializable {
         signOutMenu.setOnShown(new EventHandler<Event>() {
             @Override
             public void handle(Event event) {
-                //showSetupGui.showSignInGui();
+                //Todo: send a signout message
+
                 signOutMenu.hide();
             }
         });
@@ -240,5 +243,17 @@ public class serverListController implements Initializable {
     }
 
 
-
+    public void sort() {
+        userListView.getItems().sort(new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                //This works as indented because the possible ranks are (from most to least power):
+                //Admin, Op, User, Guest
+                //The first letter of each of them is lower down the alphabet then the previous
+                //tl;dr: I kind of got lucky here
+                //Also, if they are the same rank, then it will compare the names, so ranks can be grouped together
+                return String.valueOf(o1).compareTo(String.valueOf(o2));
+            }
+        });
+    }
 }

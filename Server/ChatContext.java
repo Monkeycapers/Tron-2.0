@@ -7,7 +7,9 @@ import Jesty.TCPBridge.ClientWorker;
  */
 public abstract class ChatContext {
 
-    String name;
+    public String name;
+
+    public String displayName;
 
     public abstract void sendMessage (GameServer gameServer, String message);
 

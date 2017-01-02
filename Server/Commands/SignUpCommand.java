@@ -2,10 +2,7 @@ package Server.Commands;
 
 import Jesty.TCPBridge.ClientWorker;
 import Jesty.TCPBridge.Clients;
-import Server.GameServer;
-import Server.Rank;
-import Server.User;
-import Server.authenticationstatus;
+import Server.*;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
@@ -27,7 +24,21 @@ public class SignUpCommand extends Command {
         if (status == authenticationstatus.Success) {
             new JSONWriter(stringWriter).object()
                     .key("argument").value("returnsignup")
-                    .key("success").value(true).endObject();
+                    .key("success").value(true)
+                    .key("users").value(gameServer.getUserList().toArray())
+                    .endObject();
+            //Add to general chat
+            ((GeneralChat)(gameServer.chatContexts.getContext("general"))).userJoinedMessage(gameServer, user);
+            //Tell the clients to add the user to their user list
+            StringWriter writer2 = new StringWriter();
+            new JSONWriter(writer2).object()
+                    .key("argument").value("updateusers")
+                    .key("name").value("general")
+                    .key("type").value("add")
+                    .key("user").value(user.chatFormatDisplay())
+                    .endObject();
+            gameServer.sendToPeers(Rank.User, user, writer2.toString());
+            //gameServer.chatContexts.doChatMessage(gameServer, user, "general", " has signed in!");
         }
         else {
             int reason = 0;

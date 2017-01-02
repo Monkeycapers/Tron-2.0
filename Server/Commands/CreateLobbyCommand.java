@@ -17,15 +17,17 @@ public class CreateLobbyCommand extends Command {
 
     @Override
     public String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user) {
-        String name = user.getName() + "," + input.getString("name");
-        String type = input.getString("type");
-        ListChatContext chatContext = new ListChatContext(user, name, input.getString("name"));
-        gameServer.chatContexts.addNewContext(chatContext);
-        if (type.equals("tron")) {
-            TronLobby tronLobby = new TronLobby(user, name, input.getInt("maxplayers"), chatContext);
-            gameServer.lobbys.addNewLobby(tronLobby);
-            user.setCurrentLobby(tronLobby);
-            tronLobby.start();
+        if (user.getCurrentLobby() == null) {
+            String name = user.getName() + "," + input.getString("name");
+            String type = input.getString("type");
+            ListChatContext chatContext = new ListChatContext(user, name, input.getString("name"));
+            gameServer.chatContexts.addNewContext(chatContext);
+            if (type.equals("tron")) {
+                TronLobby tronLobby = new TronLobby(user, name, input.getInt("maxplayers"), chatContext);
+                gameServer.lobbys.addNewLobby(tronLobby);
+                user.setCurrentLobby(tronLobby);
+                tronLobby.start();
+            }
         }
         return "";
     }

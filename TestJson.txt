@@ -29,6 +29,9 @@
 //Join a lobby
 {"argument":"joinlobby", "name":"Evan,MyLobby"}
 
+//Lobbylist command
+{"argument":"lobbylist"}
+
 //Lobby message commands:
 //Key
 {"argument":"lobbymessage", "type":"key", "key":"D"}

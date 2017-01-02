@@ -147,14 +147,13 @@ public class GameServer extends Server {
         users.remove(user);
         user = new User(targetClientWorker);
         targetClientWorker.clientData = user;
-        //Todo
+
         StringWriter stringWriter = new StringWriter();
         new JSONWriter(stringWriter).object()
                 .key("argument").value("kicked")
                 .key("reason").value(reason)
                 .endObject();
         targetClientWorker.sendMessage(stringWriter.toString());
-        //targetClientWorker.sendMessage("...You've been kicked for : ...")
     }
 
     public void ban(User user, String reason) {

@@ -5,9 +5,11 @@ package Client;
  */
 import java.io.File;
 import java.io.StringWriter;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +27,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.json.JSONWriter;
 
 public class showSetupGui extends Application {
@@ -37,6 +41,8 @@ public class showSetupGui extends Application {
 
     public static Pane connectLayout;
 
+    public static Pane lobbyListLayout;
+
     //public static Pane loadingLayout;
 
     public static Stage stage;
@@ -47,6 +53,8 @@ public class showSetupGui extends Application {
 
     public static FXMLLoader connectLoader;
 
+    public static FXMLLoader lobbyListLoader;
+
     public static GameClient client;
 
     public static testServer testServer;
@@ -56,6 +64,8 @@ public class showSetupGui extends Application {
     public static AnchorPane canvasPane;
 
     public static HashMap<String , chatTabController> chatTabHashMap;
+
+    public static HashMap<String, String> lobbyListHashMap;
 
     public static void main(String[] args) {
         Application.launch(showSetupGui.class, (java.lang.String[])null);
@@ -70,7 +80,7 @@ public class showSetupGui extends Application {
         Application.launch(showSetupGui.class, (java.lang.String[])null);
 
     }
-
+    //Needed to check if the port is a number
     public boolean isANumber(String number) {
         try {
             Integer.parseInt(number);
@@ -89,6 +99,8 @@ public class showSetupGui extends Application {
             //This is where all of the gui's are initially loaded (not shown), and the client is started.
 
             chatTabHashMap = new HashMap<>();
+
+            lobbyListHashMap = new HashMap<>();
 
 
             HashMap<String, String> defaults = new HashMap<>();
@@ -110,7 +122,16 @@ public class showSetupGui extends Application {
                 Settings.save();
             }
 
+            FXMLLoader loadingloader = new FXMLLoader();
+            loadingloader.setLocation(showSetupGui.class.getResource("loading.fxml"));
+            //Yo dawg...
+            rootLayout = (Pane) loadingloader.load();
 
+            // Show the scene containing the root layout.
+            Scene scene = new Scene(rootLayout);
+            stage = primaryStage;
+            stage.setScene(scene);
+            stage.show();
 
 //            GameServer gameServer =  new GameServer(16000, 8080);
 //            gameServer.start();
@@ -131,23 +152,16 @@ public class showSetupGui extends Application {
             canvas = ((serverListController)(outOfMenuLoader.getController())).canvas;
             canvasPane = ((serverListController)(outOfMenuLoader.getController())).canvasAnchorPane;
 
-            FXMLLoader loadingloader = new FXMLLoader();
-            loadingloader.setLocation(showSetupGui.class.getResource("loading.fxml"));
-            //Yo dawg...
-            rootLayout = (Pane) loadingloader.load();
-
             connectLoader = new FXMLLoader();
             connectLoader.setLocation(showSetupGui.class.getResource("connect.fxml"));
             connectLayout = connectLoader.load();
 
-            // Show the scene containing the root layout.
-            Scene scene = new Scene(rootLayout);
-            stage = primaryStage;
-            stage.setScene(scene);
-            stage.show();
+            lobbyListLoader = new FXMLLoader();
+            lobbyListLoader.setLocation(showSetupGui.class.getResource("lobbylist.fxml"));
+            lobbyListLayout = lobbyListLoader.load();
 
             //The gui's are loaded, safe to load the client
-            // (if this was before the gui loading code, there would be a null pointer exception)
+            // (if this was done before the gui loading code, there would be a null pointer exception)
             client =  new GameClient(host, Integer.valueOf(port));
             client.start();
             //
@@ -202,7 +216,7 @@ public class showSetupGui extends Application {
                     stage.show();
                 }
                 catch (IllegalArgumentException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     //This just means that the gui is already visible, don't need to worry
                 }
                 catch (Exception e) {
@@ -218,10 +232,17 @@ public class showSetupGui extends Application {
             @Override
             public void run() {
                 try {
+                    Scene scene = layout.getScene();
+                    if (scene == null) {
+                        scene = new Scene(layout);
+                    }
                     Stage stage2 = new Stage();
-                    Scene scene2 = new Scene(layout);
-                    stage2.setScene(scene2);
+                    stage2.setScene(scene);
                     stage2.show();
+                }
+                catch (IllegalArgumentException e) {
+                    //e.printStackTrace();
+                    //This just means that the gui is already visible, don't need to worry
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -230,7 +251,7 @@ public class showSetupGui extends Application {
         });
     }
 
-        public static void addChatTab(String name, chatTabController t) {
+    public static void addChatTab(String name, chatTabController t) {
             chatTabHashMap.putIfAbsent(name, t);
         }
 
@@ -281,6 +302,42 @@ public class showSetupGui extends Application {
         }
     }
 
+    public static void setLobbyList(JSONArray lobbys) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                lobbyListHashMap = new HashMap<String, String>();
+                lobbyListController controller = lobbyListLoader.getController();
+                //Remove all of the lobbys items
+                controller.listView.getItems().removeIf(new Predicate() {
+                    @Override
+                    public boolean test(Object o) {
+                        return true;
+                    }
+                });
+                for (Object object: lobbys) {
+                    System.out.println(object.toString());
+                    JSONObject jsonObject = new JSONObject((String.valueOf(object)));
+                    String name = jsonObject.getString("name");
+                    String displayname = jsonObject.getString("displayname");
+                    boolean isPrivate = jsonObject.getBoolean("isprivate");
+                    String players = jsonObject.getString("players");
+                    String gamemode = jsonObject.getString("gamemode");
+
+                    lobbyListHashMap.put(displayname + " " + players + " " + gamemode, name);
+                    controller.listView.getItems().add(displayname + " " + players + " " + gamemode);
+                }
+                controller.listView.getItems().sort(new Comparator() {
+                    @Override
+                    public int compare(Object o1, Object o2) {
+                        return String.valueOf(o1).compareTo(String.valueOf(o2));
+                    }
+                });
+
+            }
+        });
+    }
+
 
         //chatTabHashMap.get(name).chatTextArea.setText(chatTabHashMap.get(name).chatTextArea.getText() + "\n" + message);
 
@@ -291,6 +348,7 @@ public class showSetupGui extends Application {
             public void run() {
                 serverListController serverList = (serverListController) outOfMenuLoader.getController();
                 serverList.addUser(text);
+                serverList.sort();
             }
         });
     }
@@ -303,6 +361,7 @@ public class showSetupGui extends Application {
                 for (Object s: users) {
                     serverList.addUser((String)s);
                 }
+                serverList.sort();
                 //serverList.addUser(text);
             }
         });
@@ -314,6 +373,7 @@ public class showSetupGui extends Application {
             public void run() {
                 serverListController serverList = (serverListController) outOfMenuLoader.getController();
                 serverList.removeUser(text);
+                serverList.sort();
             }
         });
     }
@@ -323,4 +383,11 @@ public class showSetupGui extends Application {
         canvas.setWidth(canvasPane.getWidth());
     }
 
+    public static void requestLobbyList() {
+        StringWriter stringWriter = new StringWriter();
+        new JSONWriter(stringWriter).object()
+                .key("argument").value("lobbylist")
+                .endObject();
+        showSetupGui.client.sendMessage(stringWriter.toString());
+    }
 }

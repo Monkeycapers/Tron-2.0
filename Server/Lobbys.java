@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class Lobbys {
 
-    List<Lobby> lobbys;
+    private List<Lobby> lobbys;
 
     public Lobbys() {
         lobbys = new ArrayList<>();
@@ -47,5 +47,8 @@ public class Lobbys {
         }
     }
 
+    public List<Lobby> getList() {
+        return lobbys;
+    }
 
 }

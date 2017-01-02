@@ -188,6 +188,8 @@ public class TronLobby extends Lobby {
             new JSONWriter(stringWriter).object()
                     .key("argument").value("lobbydraw")
                     .key("name").value(name)
+                    .key("mapwidth").value(mapWidth)
+                    .key("mapheight").value(mapHeight)
                     .key("render").value(renderList)
                     .endObject();
             for (TronPlayer tronPlayer: players) {
@@ -224,6 +226,11 @@ public class TronLobby extends Lobby {
     @Override
     public boolean canConnect(User user) {
         return (players.size() <= maxPlayers && !isPrivate);
+    }
+
+    @Override
+    public int getPlayerCount() {
+        return players.size();
     }
 
     public ListChatContext getChat() {

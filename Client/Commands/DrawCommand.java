@@ -44,15 +44,16 @@ public class DrawCommand extends Command {
         }
         gc.setFill(Color.WHITE);
         //Todo: this info must be passed in input
-
+        int mapWidth = input.getInt("mapwidth") + 2;
+        int mapHeight = input.getInt("mapheight") + 2;
         //Top wall
-        gc.fillRect(0, 0, (21 * width), height);
+        gc.fillRect(0, 0, (mapWidth * width), height);
         //Left wall
-        gc.fillRect(0, 0, width, (21 * height));
+        gc.fillRect(0, 0, width, (mapHeight * height));
         //Right wall
-        gc.fillRect((21 * width), 0, width, (21 * height));
+        gc.fillRect((mapWidth * width), 0, width, (mapHeight * height));
         //Bottom wall
-        gc.fillRect(0, (21 * height), (21 * width), height);
+        gc.fillRect(0, (mapHeight * height), (mapWidth * width), height);
 
         gc.save();
 

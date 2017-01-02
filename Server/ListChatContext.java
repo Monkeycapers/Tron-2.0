@@ -13,13 +13,11 @@ public class ListChatContext extends ChatContext {
 
     List<User> users;
 
-    String displayname;
-
     public ListChatContext(User u1, String name, String displayname) {
         users = new ArrayList<>();
         users.add(u1);
         this.name = name;
-        this.displayname = displayname;
+        this.displayName = displayname;
     }
 
     @Override
@@ -30,7 +28,7 @@ public class ListChatContext extends ChatContext {
         new JSONWriter(stringWriter).object()
                 .key("argument").value("chatmessage")
                 .key("name").value(name)
-                .key("displayname").value(displayname)
+                .key("displayname").value(displayName)
                 .key("message").value(message)
                 .endObject();
 

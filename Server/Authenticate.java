@@ -104,6 +104,9 @@ public class Authenticate {
                out.close();
 
                 result.put("result", true);
+                result.put("name", name);
+                result.put("email", email);
+                result.put("rank", rank);
                 return result;
             }
             else {

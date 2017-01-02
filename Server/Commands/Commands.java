@@ -40,6 +40,7 @@ public class Commands {
         commands.add(new JoinLobbyCommand());
         commands.add(new LobbyMessageCommand());
         commands.add(new CreateLobbyCommand());
+        commands.add(new LobbyListCommand());
     }
 
     public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {

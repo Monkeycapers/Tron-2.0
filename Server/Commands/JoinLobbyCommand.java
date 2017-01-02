@@ -20,18 +20,19 @@ public class JoinLobbyCommand extends Command {
 
     @Override
     public String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user) {
-        String name = input.getString("name");
-        Lobby lobby = gameServer.lobbys.getLobbyByName(name);
-        if (lobby == null) {
-            //Todo
-            //Return error message
-            return "";
+        if (user.getCurrentLobby() == null) {
+            String name = input.getString("name");
+            Lobby lobby = gameServer.lobbys.getLobbyByName(name);
+            if (lobby == null) {
+                //Todo
+                //Return error message
+                return "";
+            }
+            if (lobby.canConnect(user)) {
+                lobby.onConnect(user);
+                user.setCurrentLobby(lobby);
+            }
         }
-        if (lobby.canConnect(user)) {
-            lobby.onConnect(user);
-            user.setCurrentLobby(lobby);
-        }
-
         return "";
     }
 
