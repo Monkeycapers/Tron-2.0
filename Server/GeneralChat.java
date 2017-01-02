@@ -14,23 +14,15 @@ public class GeneralChat extends ChatContext {
     }
 
     @Override
-    public void sendMessage(GameServer gameServer, String message, User user) {
+    public void sendMessage(GameServer gameServer, String message) {
         //Send the message to all users
         StringWriter stringWriter = new StringWriter();
         new JSONWriter(stringWriter).object()
                 .key("argument").value("chatmessage")
                 .key("name").value(name)
-                .key("message").value(genMessage(message, user))
+                .key("message").value(message)
                 .key("displayname").value("General")
                 .endObject();
-        sendMessage(gameServer, stringWriter.toString());
-    }
-    //Format the message
-    public String genMessage(String message, User user) {
-        return "<" + user.getRank().toString() + ">" + " " + user.getName() + " " + message;
-    }
-
-    public void sendMessage(GameServer gameServer, String message) {
         gameServer.sendToAll(Rank.User, message);
     }
 
@@ -58,5 +50,11 @@ public class GeneralChat extends ChatContext {
                 .endObject();
         sendMessage(gameServer, stringWriter.toString());
     }
+
+    @Override
+    public boolean removeUser(User user) {
+        return false;
+    }
+
     //
 }

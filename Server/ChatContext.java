@@ -9,7 +9,9 @@ public abstract class ChatContext {
 
     String name;
 
-    public abstract void sendMessage (GameServer gameServer, String message, User user);
+    public abstract void sendMessage (GameServer gameServer, String message);
+
+    public abstract boolean removeUser(User user);
 
     //public abstract void onClose (GameServer gameServer)
 

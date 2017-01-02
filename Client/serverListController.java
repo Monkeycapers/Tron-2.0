@@ -11,10 +11,17 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import org.json.JSONWriter;
 
+import javax.swing.event.HyperlinkEvent;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
@@ -25,31 +32,88 @@ import java.util.ResourceBundle;
  */
 public class serverListController implements Initializable {
 
-    //Server List view
-    @FXML
-    ListView listView;
-
-    //Todo move chatTabPane to showSetupGui
     @FXML
     TabPane chatTabPane;
+
+    @FXML
+    Menu showLobbyListMenu;
+
+    @FXML
+    Menu signOutMenu;
 
     //User List view
 
     @FXML
     ListView userListView;
 
+    @FXML
+    Canvas canvas;
+
+    @FXML
+    AnchorPane canvasAnchorPane;
+
     HashMap<Tab, chatTabController> tabControllerHashMap;
+
+    HashMap<String, Tab> tabNameHashMap;
 
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         System.out.println("Init Server List Gui");
+        //Force the canvas to register all key inputs
+        canvas.setFocusTraversable(true);
+        canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
+        //
         tabControllerHashMap = new HashMap<>();
 //        chatTabPane.getTabs().add(getNewTab("Wow!", "Wow"));
 //        chatTabPane.getTabs().add(getNewTab("much", "lol"));
 //        chatTabPane.getTabs().add(getNewTab("panes", "bup"));
 
         //userListView.getItems().addAll("User1", "User2", "User3");
+
+        //Trick the menu into firing an action listener when the menu is pressed without actually showing the menu
+        showLobbyListMenu.getItems().add(new MenuItem(""));
+        showLobbyListMenu.setOnShown(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                //showSetupGui.showLobbyListGui();
+                showLobbyListMenu.hide();
+            }
+        });
+
+        signOutMenu.getItems().add(new MenuItem(""));
+        signOutMenu.setOnShown(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                //showSetupGui.showSignInGui();
+                signOutMenu.hide();
+            }
+        });
+        //
+
+
+        canvas.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                String tosend = "";
+                if (event.getCode() == KeyCode.W || event.getCode() == KeyCode.UP) tosend = "W"; //UP
+                else if (event.getCode() == KeyCode.S || event.getCode() == KeyCode.DOWN) tosend = "S"; //DOWN
+                else if (event.getCode() == KeyCode.D || event.getCode() == KeyCode.RIGHT) tosend = "D"; //RIGHT
+                else if (event.getCode() == KeyCode.A || event.getCode() == KeyCode.LEFT) tosend = "A"; //LEFT
+                if (!tosend.equals("")) {
+                    System.out.println("sending a key message");
+                    StringWriter stringWriter = new StringWriter();
+                    new JSONWriter(stringWriter).object()
+                            .key("argument").value("lobbymessage")
+                            .key("type").value("key")
+                            .key("key").value(tosend).endObject();
+                    showSetupGui.client.sendMessage(stringWriter.toString());
+                }
+            }
+        });
+
+
+
         //todo NOT my code (need to change)
         userListView.setCellFactory(lv -> {
 
@@ -123,6 +187,9 @@ public class serverListController implements Initializable {
                     }
                 }
         );
+
+        tabNameHashMap = new HashMap<>();
+
 //        generalTextField.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
 //
 //            @Override
@@ -146,6 +213,7 @@ public class serverListController implements Initializable {
             controller.name = name;
             controller.lastDisplayName = displayname;
             tabControllerHashMap.put(tab, fxmlLoader.getController());
+            tabNameHashMap.put(name, tab);
             showSetupGui.addChatTab(name, fxmlLoader.getController());
         }
         catch (Exception e) {
@@ -159,6 +227,10 @@ public class serverListController implements Initializable {
         chatTabPane.getTabs().add(tab);
     }
 
+    public void removeTab (Tab tab) {
+        chatTabPane.getTabs().remove(tab);
+    }
+
     public void addUser(String text) {
         userListView.getItems().add(text);
     }
@@ -166,5 +238,7 @@ public class serverListController implements Initializable {
     public void removeUser (String text) {
         userListView.getItems().remove(text);
     }
+
+
 
 }

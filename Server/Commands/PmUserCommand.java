@@ -28,7 +28,7 @@ public class PmUserCommand extends Command {
         User targetUser = gameServer.getUserByName(input.getString("name"));
         if (targetUser != null) {
             PmChat context = new PmChat(user, targetUser);
-            context.sendMessage(gameServer, targetUser.chatFormatDisplay() + " is online.", user, true);
+            context.sendMessage(gameServer, targetUser.chatFormatDisplay() + " is online.",  true);
             gameServer.chatContexts.addNewContext(context);
         }
         return "";

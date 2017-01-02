@@ -18,27 +18,47 @@ public class PmChat extends ChatContext {
     }
 
     @Override
-    public void sendMessage(GameServer gameServer, String message, User user) {
-        sendMessage(gameServer, message, user, false);
+    public void sendMessage(GameServer gameServer, String message) {
+        sendMessage(gameServer, message, false);
     }
 
-    public void sendMessage(GameServer gameServer, String message, User user, boolean starter) {
+    public void sendMessage(GameServer gameServer, String message, boolean starter) {
+        //Todo: make this efficient
         StringWriter stringWriter = new StringWriter();
         String displayname = "Error";
-        if (user == u1) {
-            displayname = "Private message with " + u1.getName();
-        }
-        else if (user == u2) {
-            displayname = "Private message with " + u2.getName();
-        }
+        displayname = "Private message with " + u2.getName();
         new JSONWriter(stringWriter).object()
                 .key("argument").value("chatmessage")
                 .key("name").value(name)
                 .key("displayname").value(displayname)
-                .key("message").value(user.chatFormatDisplay() + " " + message).endObject();
+                .key("message").value(message).endObject();
 
         u1.clientWorker.sendMessage(stringWriter.toString());
-        if (!starter) u2.clientWorker.sendMessage(stringWriter.toString());
+        displayname = "Private message with " + u1.getName();
+        StringWriter stringWriter2 = new StringWriter();
+        new JSONWriter(stringWriter2).object()
+                .key("argument").value("chatmessage")
+                .key("name").value(name)
+                .key("displayname").value(displayname)
+                .key("message").value(message).endObject();
+        if (!starter) u2.clientWorker.sendMessage(stringWriter2.toString());
     }
 
+    @Override
+    public boolean removeUser(User user) {
+        User target = null;
+        if (u1.equals(user)) target = u2;
+        else if (u2.equals(user)) target = u1;
+        if (target != null) {
+            System.out.println("Removing user: " + user.chatFormatDisplay());
+            StringWriter stringWriter = new StringWriter();
+            new JSONWriter(stringWriter).object()
+                    .key("argument").value("closechat")
+                    .key("name").value(name)
+                    .endObject();
+            target.clientWorker.sendMessage(stringWriter.toString());
+            return true;
+        }
+        return false;
+    }
 }

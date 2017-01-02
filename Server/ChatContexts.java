@@ -23,6 +23,9 @@ public class ChatContexts {
 
     public ChatContext getContext (String name) {
         for (ChatContext chatContext: chatContexts) {
+            System.out.println("The name: " + name);
+            System.out.println("Is the chatContext null?" + (chatContext == null));
+            System.out.println("The chatContext name: " + chatContext.name);
             if (chatContext.name.equals(name)) {
                 return chatContext;
             }
@@ -33,6 +36,16 @@ public class ChatContexts {
     public void doChatMessage(GameServer gameServer, User user, String name, String message) {
         ChatContext chatContext = getContext(name);
         if (chatContext == null) return;
-        chatContext.sendMessage(gameServer, message, user);
+        chatContext.sendMessage(gameServer, user.chatFormatDisplay() + " " + message);
+    }
+
+    public void removeUser(User user) {
+        for (ChatContext chatContext: chatContexts) {
+            if (chatContext.removeUser(user)) {
+                //Dissolve the chat
+                removeContext(chatContext);
+                break;
+            }
+        }
     }
 }

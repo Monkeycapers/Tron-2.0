@@ -24,7 +24,7 @@ public class returnSignInCommand extends Command {
                 gameClient.isHighRank = true;
                 JSONArray jsonArray = input.getJSONArray("users");
                // showSetupGui.addUser();
-                showSetupGui.showOutOfGameMenu();
+                showSetupGui.showLayout(showSetupGui.outOfMenuLayout);
                 showSetupGui.addUsers(jsonArray.toList());
                 //showSetupGui.loginloader.getController().
                 //((signinController)(showSetupGui.loginloader.getController())).hide();

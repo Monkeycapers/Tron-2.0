@@ -67,7 +67,7 @@ public class Settings {
         }
     }
 
-    public static Object getProperty(String name) {
+    public static String getProperty(String name) {
         return propertys.get(name);
     }
 

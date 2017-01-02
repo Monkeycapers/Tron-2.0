@@ -21,3 +21,14 @@
 {"argument":"chatmessage", "name":"notcurrentlyinused1", "displayname":"Chat room1", "message":"AMessage"}
 
 {"argument":"chatmessage", "name":"notcurrentlyinused2", "displayname":"Chat room2", "message":"AMessage"}
+
+
+//Create a lobby
+{"argument":"createlobby", "name":"MyLobby", "type":"tron", "maxplayers":10}
+
+//Join a lobby
+{"argument":"joinlobby", "name":"Evan,MyLobby"}
+
+//Lobby message commands:
+//Key
+{"argument":"lobbymessage", "type":"key", "key":"D"}

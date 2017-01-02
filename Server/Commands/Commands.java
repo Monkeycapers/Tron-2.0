@@ -37,6 +37,9 @@ public class Commands {
         commands.add(new UserExistsCommand());
         commands.add(new ChatMessageCommand());
         commands.add(new PmUserCommand());
+        commands.add(new JoinLobbyCommand());
+        commands.add(new LobbyMessageCommand());
+        commands.add(new CreateLobbyCommand());
     }
 
     public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {

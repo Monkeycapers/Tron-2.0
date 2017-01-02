@@ -31,6 +31,8 @@ public class GameServer extends Server {
 
     public Commands commands;
 
+    public Lobbys lobbys;
+
     public GameServer(int raw_port, int web_port) {
         super(raw_port, web_port);
         users = new ArrayList<User>();
@@ -43,6 +45,8 @@ public class GameServer extends Server {
         commands = new Commands(this);
         chatContexts = new ChatContexts();
         chatContexts.addNewContext(new GeneralChat());
+        lobbys = new Lobbys();
+
     }
 
     @Override
@@ -89,6 +93,20 @@ public class GameServer extends Server {
     public void onClose(ClientWorker clientWorker, int code) {
         User user = (User)(clientWorker.clientData);
         users.remove(user);
+        chatContexts.removeUser(user);
+        Lobby lobby = user.getCurrentLobby();
+        if (lobby != null) {
+            if (lobby.onClose(user)) {
+                try {
+                    lobby.isRunning = false;
+                    lobby.thread.join();
+                    lobbys.removeLobby(lobby);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         if (Authenticate.checkRank(user.getRank(), Rank.User)) {
             //System.out.println("sending leave message");
             ((GeneralChat)(chatContexts.getContext("general"))).userLeftMessage(this, user);

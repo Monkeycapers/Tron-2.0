@@ -30,10 +30,10 @@ public class GameClient extends Jesty.TCPBridge.Client {
     public void onMessage(String message) {
         try {
             JSONObject jsonObject = new JSONObject(message);
-            System.out.println(jsonObject.toString());
+            //System.out.println(jsonObject.toString());
 
             String result = commands.orchestrateCommand(jsonObject);
-            System.out.println(result);
+            //System.out.println(result);
         }
         catch (JSONException e) {
             System.out.println("invalid format: " + e.getMessage());
@@ -52,11 +52,12 @@ public class GameClient extends Jesty.TCPBridge.Client {
 
     @Override
     public void onOpen() {
-
+        showSetupGui.showLayout(showSetupGui.loginLayout);
     }
+
     @Override
     public void onClose() {
-
+        showSetupGui.showLayout(showSetupGui.connectLayout);
     }
 
     @Override

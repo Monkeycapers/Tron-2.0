@@ -20,7 +20,7 @@ public class returnSignUpCommand extends Command {
         if (input.getBoolean("success")) {
             System.out.println("authed...");
             //Todo: setup the next gui
-            showSetupGui.showOutOfGameMenu();
+            showSetupGui.showLayout(showSetupGui.outOfMenuLayout);
         }
         else {
             int reason = input.getInt("reason");

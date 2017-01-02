@@ -1,11 +1,14 @@
 package Client;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import org.json.JSONWriter;
 
 import java.io.StringWriter;
@@ -42,6 +45,14 @@ public class chatTabController implements Initializable {
                 System.out.println("handling: " + src.getText());
                 showSetupGui.handleChatMessage(name, src.getText());
                 src.setText("");
+            }
+        });
+
+        chatTextArea.textProperty().addListener(new ChangeListener<Object>() {
+            @Override
+            public void changed(ObservableValue<?> observable, Object oldValue,
+                                Object newValue) {
+                chatTextArea.setScrollTop(Double.MAX_VALUE);
             }
         });
     }

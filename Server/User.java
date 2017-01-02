@@ -118,7 +118,7 @@ public class User {
     }
 
     public boolean setCurrentLobby(Lobby lobby) {
-        //...//
+        this.currentLobby = lobby;
         return true;
     }
 
