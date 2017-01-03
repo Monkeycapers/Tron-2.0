@@ -42,7 +42,7 @@ public class chatTabController implements Initializable {
             @Override
             public void handle(ActionEvent event) {
                 TextField src = ((TextField)(event.getSource()));
-                System.out.println("handling: " + src.getText());
+                //System.out.println("handling: " + src.getText());
                 showSetupGui.handleChatMessage(name, src.getText());
                 src.setText("");
             }

@@ -1,5 +1,6 @@
 package Server;
 
+import Jesty.Settings;
 import javafx.scene.paint.Color;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -23,6 +24,8 @@ public class TronLobby extends Lobby {
 
     int mapHeight;
 
+    int sleepTime;
+
     final int MAX_SUPPORTED_PLAYERS = 12;
 
     //Ensure all generated colors are not similar
@@ -41,8 +44,12 @@ public class TronLobby extends Lobby {
 
     public TronLobby(User creator, String lobbyName, int maxPlayers, ChatContext chatContext) {
 
-        mapWidth = 50;
-        mapHeight = 50;
+        Settings.load();
+
+        mapWidth = Settings.getIntProperty("tronmapwidth");
+        mapHeight = Settings.getIntProperty("tronmapheight");
+
+        sleepTime = Settings.getIntProperty("tronsleeptime");
 
         this.name = lobbyName;
         this.chatContext = chatContext;
@@ -244,7 +251,7 @@ public class TronLobby extends Lobby {
             }
 
             //Sleep (equivalent of a timer)
-            try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
+            try {Thread.sleep(sleepTime);} catch (Exception e) {e.printStackTrace();}
         }
     }
 
@@ -266,6 +273,7 @@ public class TronLobby extends Lobby {
     }
 
     public void reset() {
+
         int multi = 0;
         for (int i = 0; i < players.size(); i ++) {
             TronPlayer player = players.get(i);
@@ -335,9 +343,9 @@ public class TronLobby extends Lobby {
             players.set(i, player);
         }
 
-        for (TronPlayer player: players) {
-            System.out.println("User " + player.user.chatFormatDisplay() + ", Is alive: " + player.isAlive + "Is visible " + player.isVisible + " Direction " + player.snake.direction + ", " + player.snake.direction);
-        }
+//        for (TronPlayer player: players) {
+//            System.out.println("User " + player.user.chatFormatDisplay() + ", Is alive: " + player.isAlive + "Is visible " + player.isVisible + " Direction " + player.snake.direction + ", " + player.snake.direction);
+//        }
     }
 
     @Override

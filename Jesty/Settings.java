@@ -71,6 +71,16 @@ public class Settings {
         return propertys.get(name);
     }
 
+    public static int getIntProperty(String name) {
+        try {
+            return Integer.parseInt(propertys.get(name));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public static boolean hasProperty(String name) {
         return propertys.containsKey(name);
     }
@@ -78,5 +88,17 @@ public class Settings {
     public static void setProperty(String name, String value) {
         propertys.replace(name, value);
         save();
+    }
+
+    public static HashMap<String, String> getPropertys () {
+        return propertys;
+    }
+
+    public static String listPropertys() {
+        String toSend = "Propertys: " + "\n";
+        for (Map.Entry<String, String> entry:getPropertys().entrySet()) {
+            toSend += entry.getKey() + ":" + entry.getValue() + "\n";
+        }
+        return toSend;
     }
 }

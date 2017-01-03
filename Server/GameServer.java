@@ -46,9 +46,12 @@ public class GameServer extends Server {
     public void setup() {
         users = new ArrayList<User>();
         HashMap<String, String> defaults = new HashMap<>();
+        defaults.put("tronmapwidth", "100");
+        defaults.put("tronmapheight", "100");
+        defaults.put("tronsleeptime", "100");
         //...//
         //set up defaults
-        Settings.setFile(new File("settings.txt"), defaults);
+        Settings.setFile(new File("serversettings.txt"), defaults);
         Authenticate.setFile(new File("users.json"));
         Settings.load();
         commands = new Commands(this);

@@ -5,10 +5,7 @@ package Client;
  */
 import java.io.File;
 import java.io.StringWriter;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -267,14 +264,49 @@ public class showSetupGui extends Application {
         if (!chatTabHashMap.containsKey(name)) {
             return;
         }
-        StringWriter stringWriter = new StringWriter();
-        new JSONWriter(stringWriter).object()
-                .key("argument").value("chatmessage")
-                .key("name").value(name)
-                .key("message").value(text)
-                .endObject();
-        client.sendMessage(stringWriter.toString());
+        //Check for internal Client commands
+        String toSend = "";
+
+        if (text.startsWith(".help")) {
+            toSend = "Commands:\n.changeproperty [propertyname] [newvalue] --> Updates a Settings property" +
+                    "\n.listpropertys --> Lists the propertys and their values" +
+                    "\n.loadpropertys --> Loads the settings from the txt file";
+        }
+        else if (text.startsWith(".changeproperty")) {
+            String[] split = text.split(" ");
+            Settings.setProperty(split[1], split[2]);
+            toSend = "Changed property: " + split[1] + " to " + split[2] + ".\n" + Settings.listPropertys();
+        }
+        else if (text.startsWith(".listpropertys")) {
+            toSend = Settings.listPropertys();
+        }
+        else if (text.startsWith(".loadpropertys")) {
+            Settings.load();
+            toSend = "Updated propertys.\n" + Settings.listPropertys();
+        }
+        //Does not match internal commands, send message to server
+        else {
+            StringWriter stringWriter = new StringWriter();
+            new JSONWriter(stringWriter).object()
+                    .key("argument").value("chatmessage")
+                    .key("name").value(name)
+                    .key("message").value(text)
+                    .endObject();
+            client.sendMessage(stringWriter.toString());
+        }
+        if (!toSend.isEmpty()) {
+            //Loop back
+            pushMessage("Client-->local", "Client", toSend);
+        }
     }
+
+//    public static String listPropertys() {
+//        String toSend = "Propertys: " + "\n";
+//        for (Map.Entry<String, String> entry:Settings.getPropertys().entrySet()) {
+//            toSend += entry.getKey() + ":" + entry.getValue() + "\n";
+//        }
+//        return toSend;
+//    }
 
     public static void pushMessage(String name, String displayName, String message) {
 
@@ -413,6 +445,8 @@ public class showSetupGui extends Application {
         });
     }
     //Synchronized means that other threads must wait for this to be done
+    //(similar to how code waits for a JOptionPane to be done)
+    //Ensures that Canvas is only being changed once
     public static synchronized void render(List<Object> render, int mapWidth, int mapHeight) {
 
         showSetupGui.updateCanvas();

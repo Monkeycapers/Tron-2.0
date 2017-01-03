@@ -1,5 +1,6 @@
 package Server;
 
+import Jesty.Settings;
 import Jesty.TCPBridge.ClientWorker;
 import org.json.JSONWriter;
 
@@ -46,7 +47,7 @@ public class ChatContexts {
                 //Todo: do help
                 toSend = "List of all inner chat commands:\n" +
                         "/help (Command) --> Gets help for that command\n" +
-                        "/list [all, online, RankName] --> get a list of users that meet the criteria\n" +
+                        "/list [all, online, RankName, lobby, clients, propertys] --> get a list of users that meet the criteria\n" +
                         "/ping --> Pong!";
             }
             if (message.startsWith("/list all")) {
@@ -69,6 +70,24 @@ public class ChatContexts {
                     for (ClientWorker w: gameServer.getClients()) {
                         toSend += w.toString() + "\n";
                     }
+                }
+            }
+            else if (message.startsWith("/list propertys")) {
+                if (Authenticate.checkRank(user.getRank(), Rank.Op)) {
+                    toSend = Settings.listPropertys();
+                }
+            }
+            else if (message.startsWith("/changeproperty")) {
+                if (Authenticate.checkRank(user.getRank(), Rank.Op)) {
+                    String[] split = message.split(" ");
+                    Settings.setProperty(split[1], split[2]);
+                    toSend = "Changed property: " + split[1] + " to " + split[2] + ".\n" + Settings.listPropertys();
+                }
+            }
+            else if (message.startsWith("/loadpropertys")) {
+                if (Authenticate.checkRank(user.getRank(), Rank.Op)) {
+                    Settings.load();
+                    toSend = "Loaded propertys.\n" + Settings.listPropertys();
                 }
             }
 
