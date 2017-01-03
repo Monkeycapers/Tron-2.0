@@ -25,8 +25,8 @@ public class PmUserCommand extends Command {
 
     @Override
     public String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user) {
-        User targetUser = gameServer.getUserByName(input.getString("name"));
-        if (targetUser != null) {
+        User targetUser = gameServer.getUserByName(input.getString("user"));
+        if (targetUser != null && targetUser != user) {
             PmChat context = new PmChat(user, targetUser);
             context.sendMessage(gameServer, targetUser.chatFormatDisplay() + " is online.",  true);
             gameServer.chatContexts.addNewContext(context);

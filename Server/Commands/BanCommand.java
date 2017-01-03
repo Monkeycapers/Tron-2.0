@@ -21,10 +21,18 @@ public class BanCommand extends Command {
     @Override
     public String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user) {
         input.put("rank", "Banned");
-        JSONObject jout = new JSONObject(gameServer.commands.getCommand("promote").docommand(clientWorker, gameServer, input, user)) ;
-        if(jout.getBoolean("result")) {
-            //gameServer.kick(user, input.getString("banreason"));
+        User u = gameServer.getUserByName(input.getString("user"));
+        if (u != null) {
+            u.setBanReason(input.getString("reason"));
         }
+        JSONObject jout = new JSONObject(gameServer.commands.getCommand("promote").docommand(clientWorker, gameServer, input, user)) ;
+//        if(jout.getBoolean("result")) {
+//            //Kick the user if they are still on the server
+//            String username = input.getString("user");
+//            User u = gameServer.getUserByName(username);
+//            if (u != null)  gameServer.kick(u, input.getString("reason"));
+//            //
+//        }
         jout.remove("argument");
         jout.put("argument", "returnban");
         return jout.toString();

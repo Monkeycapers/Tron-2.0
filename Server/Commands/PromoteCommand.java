@@ -39,8 +39,10 @@ public class PromoteCommand extends Command {
             User u = gameServer.getUserByName(username);
             if (u != null) {
 
-                    //gameServer.ban(u, input.getStrin;g("reason"));
+                    //gameServer.ban(u, input.getStrin;g("reason"))
+                    //Todo: Allow for hot rank changing
                     u.updateRank(rankToPromoteTo);
+                    gameServer.kick(u, "Your rank has been updated, please sign in again.");
                     new JSONWriter(result).object()
                             .key("argument").value("returnPromote")
                             .key("result").value(true).endObject();
@@ -51,7 +53,12 @@ public class PromoteCommand extends Command {
                 //Try to update the offline data
                 OfflineUser offlineUser = new OfflineUser();
                 offlineUser.unSecureSignIn(username);
-                offlineUser.banreason = input.getString("reason");
+                if (input.has("reason")) {
+                    offlineUser.banreason = input.getString("reason");
+                }
+                else {
+                    offlineUser.banreason = "Banned";
+                }
                 System.out.println(offlineUser.name + ", " + offlineUser.email);
                 int comparedrank = Authenticate.compareRanks(user.getRank(), offlineUser.rank);
                 if (comparedrank > 0) {

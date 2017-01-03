@@ -15,16 +15,19 @@ public class TronPlayer {
 
     boolean isAlive = false;
 
+    boolean isVisible = false;
+
     int score = 0;
 
     public TronPlayer (User user, Direction direction, Point location, Color color) {
         this.user = user;
-        snake = new Snake(1, direction, SnakeType.TRON, location, color);
+        snake = new Snake(0, direction, SnakeType.TRON, location, color);
     }
 
     public void reset() {
         snake.reset();
         isAlive = true;
+        isVisible = true;
     }
 
 }

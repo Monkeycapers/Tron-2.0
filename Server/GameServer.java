@@ -35,6 +35,15 @@ public class GameServer extends Server {
 
     public GameServer(int raw_port, int web_port) {
         super(raw_port, web_port);
+        setup();
+    }
+
+    public GameServer(int port, boolean type) {
+        super(port, type);
+        setup();
+    }
+
+    public void setup() {
         users = new ArrayList<User>();
         HashMap<String, String> defaults = new HashMap<>();
         //...//
@@ -46,7 +55,6 @@ public class GameServer extends Server {
         chatContexts = new ChatContexts();
         chatContexts.addNewContext(new GeneralChat());
         lobbys = new Lobbys();
-
     }
 
     @Override
@@ -186,5 +194,9 @@ public class GameServer extends Server {
             userlist.add("[" + user.getRank() + "] " + user.getName());
         }
         return userlist;
+    }
+
+    public List<ClientWorker> getClients() {
+        return clients.getList();
     }
 }

@@ -8,6 +8,7 @@ import java.awt.*;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Created by Evan on 12/27/2016.
@@ -22,9 +23,12 @@ public class TronLobby extends Lobby {
 
     int mapHeight;
 
+    final int MAX_SUPPORTED_PLAYERS = 12;
+
     //Ensure all generated colors are not similar
     Color[] colortable = new Color[] {
             Color.RED, Color.GREEN, Color.ORANGE, Color.BLUE, Color.LIGHTBLUE, Color.LIGHTGREEN, Color.LIGHTPINK, Color.PURPLE
+            , Color.INDIGO, Color.IVORY, Color.MIDNIGHTBLUE, Color.LIMEGREEN, Color.VIOLET
     };
 
     Direction[] directiontable = new Direction[] {
@@ -32,7 +36,6 @@ public class TronLobby extends Lobby {
     };
 
 
-    int multi = 0;
 
     int usersalive = 0;
 
@@ -44,37 +47,68 @@ public class TronLobby extends Lobby {
         this.name = lobbyName;
         this.chatContext = chatContext;
         players = new ArrayList<>();
-        TronPlayer creatorplayer = new TronPlayer(creator, directiontable[0], getNewStartingPoint(), colortable[0]);
+        TronPlayer creatorplayer = new TronPlayer(creator, directiontable[0], new Point(0, 0), colortable[0]);
         this.creator = creatorplayer;
         players.add(creatorplayer);
+        if (maxPlayers > MAX_SUPPORTED_PLAYERS) maxPlayers = MAX_SUPPORTED_PLAYERS;
         this.maxSize = maxPlayers;
 
     }
 
 
-    public Point getNewStartingPoint() {
-        Point point;
-        //Point Down
-        if (multi == 0) {
-            point = new Point(players.size() * 4, 0);
-        }
-        //Point Up
-        else if (multi == 1) {
-            point = new Point(players.size() * 4, mapHeight);
-        }
-        //Point Right
-        else if (multi == 2) {
-            point = new Point(0, players.size() * 4);
-        }
-        //Point Left
-        else if (multi == 3) {
-            point = new Point(mapWidth, players.size() * 4);
-        }
-        else {
-            point = null;
-        }
-        return point;
-    }
+//    public Point getNewStartingPoint() {
+////        Point point;
+////        //Point Down
+////        if (multi == 0) {
+////            point = new Point(players.size() * 4, 0);
+////        }
+////        //Point Up
+////        else if (multi == 1) {
+////            point = new Point(players.size() * 4, mapHeight);
+////        }
+////        //Point Right
+////        else if (multi == 2) {
+////            point = new Point(0, players.size() * 4);
+////        }
+////        //Point Left
+////        else if (multi == 3) {
+////            point = new Point(mapWidth, players.size() * 4);
+////        }
+////        else {
+////            point = null;
+////        }
+//
+//        Point point;
+//
+//        //determine what to divide by
+//        int divideby;
+//        if (above4) divideby = 4;
+//        else divideby = 2;
+//        //
+//
+//        //Point down
+//        if (multi == 0) {
+//            point = new Point(mapWidth / divideby, 0);
+//        }
+//        //Point up
+//        else if (multi == 1) {
+//            point = new Point(mapWidth / divideby, mapHeight);
+//        }
+//        //Point Right
+//        else if (multi == 2) {
+//            point = new Point(0, mapHeight / divideby);
+//        }
+//        //Point left
+//        else if (multi == 3) {
+//            point = new Point(mapWidth, mapHeight / divideby);
+//        }
+//        //Point ???
+//        else {
+//            point = new Point(mapWidth / divideby, mapHeight / divideby);
+//        }
+//
+//        return point;
+//    }
 
     @Override
     public boolean onClose(User user) {
@@ -91,9 +125,7 @@ public class TronLobby extends Lobby {
     public void onConnect(User user) {
         user.setCurrentLobby(this);
         getChat().users.add(user);
-        multi ++;
-        if (multi >= 4) multi = 0;
-        TronPlayer player = new TronPlayer(user, directiontable[multi], getNewStartingPoint(), colortable[players.size()]);
+        TronPlayer player = new TronPlayer(user, directiontable[0], new Point(0, 0), colortable[players.size()]);
         players.add(player);
     }
 
@@ -151,10 +183,20 @@ public class TronLobby extends Lobby {
 //                    }
                     //Other and self snakes
                     for (TronPlayer otherTronPlayer: players) {
-                        for (Body body:otherTronPlayer.snake.body) {
-                            if (tronPlayer.snake.head.xCord == body.xCord && tronPlayer.snake.head.yCord == body.yCord) {
-                                chatContext.sendMessage(null, otherTronPlayer.user.getName() + " Killed " + tronPlayer.user.getName() + "!");
+                        if (otherTronPlayer.isVisible && otherTronPlayer != tronPlayer) {
+                            if (tronPlayer.snake.head.xCord == otherTronPlayer.snake.head.xCord && tronPlayer.snake.head.yCord == otherTronPlayer.snake.head.yCord && otherTronPlayer.isAlive) {
+                                //Two heads run into each other
+                                chatContext.sendMessage(null, "Wow! " + tronPlayer.user.chatFormatDisplay() + " and " + otherTronPlayer.user.chatFormatDisplay() + " Killed each other!");
                                 tronPlayer.isAlive = false;
+                                otherTronPlayer.isAlive = false;
+                            }
+                            else {
+                                for (Body body:otherTronPlayer.snake.body) {
+                                    if (tronPlayer.snake.head.xCord == body.xCord && tronPlayer.snake.head.yCord == body.yCord) {
+                                        chatContext.sendMessage(null, otherTronPlayer.user.getName() + " Killed " + tronPlayer.user.getName() + "!");
+                                        tronPlayer.isAlive = false;
+                                    }
+                                }
                             }
                         }
                     }
@@ -166,20 +208,21 @@ public class TronLobby extends Lobby {
 
             //System.out.println("users alive " + usersalive + ", " + "users: " + players.size() + ";");
 
-            if (usersalive < 2) {
-                reset();
-            }
+
 
             //Render
             //Gen a list of all snake's points
 
             List<String> renderList = new ArrayList<>();
             for (TronPlayer tronPlayer: players) {
-                if (tronPlayer.isAlive) {
-                    renderList.add((int)(tronPlayer.snake.color.getRed() * 255) + "," + (int)(tronPlayer.snake.color.getGreen() * 255) + "," + (int)(tronPlayer.snake.color.getBlue() * 255) +  "," + (tronPlayer.snake.head.xCord + 1) + "," + (tronPlayer.snake.head.yCord + 1));
-                }
-                for (Body b: tronPlayer.snake.body) {
-                    renderList.add((int)(tronPlayer.snake.color.getRed() * 255) + "," + (int)(tronPlayer.snake.color.getGreen() * 255) + "," + (int)(tronPlayer.snake.color.getBlue() * 255) + "," + (b.xCord + 1) + "," + (b.yCord + 1));
+                if (tronPlayer.isVisible) {
+
+                    for (Body b : tronPlayer.snake.body) {
+                        renderList.add((int) (tronPlayer.snake.color.getRed() * 255) + "," + (int) (tronPlayer.snake.color.getGreen() * 255) + "," + (int) (tronPlayer.snake.color.getBlue() * 255) + "," + (b.xCord + 1) + "," + (b.yCord + 1));
+                    }
+
+                    renderList.add((255) + "," +  (255) + "," + (255) + "," + (tronPlayer.snake.head.xCord + 1) + "," + (tronPlayer.snake.head.yCord + 1));
+
                 }
             }
             StringWriter stringWriter = new StringWriter();
@@ -193,6 +236,13 @@ public class TronLobby extends Lobby {
             for (TronPlayer tronPlayer: players) {
                 tronPlayer.user.clientWorker.sendMessage(stringWriter.toString());
             }
+
+            //
+
+            if (usersalive < 2) {
+                reset();
+            }
+
             //Sleep (equivalent of a timer)
             try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
         }
@@ -216,8 +266,77 @@ public class TronLobby extends Lobby {
     }
 
     public void reset() {
-        for (TronPlayer tronPlayer: players) {
-            tronPlayer.reset();
+        int multi = 0;
+        for (int i = 0; i < players.size(); i ++) {
+            TronPlayer player = players.get(i);
+            player.reset();
+            Point point;
+
+            double divideby = 1;
+            boolean doAdd = false;
+            if (i <= 3) {
+                divideby = 2;
+            }
+            else if (i <= 7) {
+                divideby = 4;
+            }
+            else if (i <= 11) {
+                divideby = 2;
+                doAdd = true;
+            }
+
+            //Point down
+            if (multi == 0) {
+                if (doAdd) {
+                    point = new Point((int)(mapWidth / divideby) + (mapWidth / 4), 0);
+                }
+                else {
+                    point = new Point((int)(mapWidth / divideby), 0);
+                }
+            }
+            //Point up
+            else if (multi == 1) {
+                if (doAdd) {
+                    point = new Point((int)(mapWidth / divideby) + (mapWidth / 4), mapHeight);
+                }
+                else {
+                    point = new Point((int)(mapWidth / divideby), mapHeight);
+                }
+            }
+            //Point Right
+            else if (multi == 2) {
+                if (doAdd) {
+                    point = new Point(0, (int)(mapHeight / divideby) + (mapHeight / 4));
+                }
+                else {
+                    point = new Point(0, (int)(mapHeight / divideby));
+                }
+            }
+            //Point left
+            else if (multi == 3) {
+                if (doAdd) {
+                    point = new Point(mapWidth, (int)(mapHeight / divideby) + (mapHeight / 4));
+                }
+                else {
+                    point = new Point(mapWidth, (int)(mapHeight / divideby));
+                }
+            }
+            //Point ???
+            else {
+                point = new Point((int)(mapWidth / divideby), (int)(mapHeight / divideby));
+            }
+
+            player.snake = new Snake(1, directiontable[multi], SnakeType.TRON, point, colortable[i]);
+
+            multi ++;
+            if (multi >= 4) {
+                multi = 0;
+            }
+            players.set(i, player);
+        }
+
+        for (TronPlayer player: players) {
+            System.out.println("User " + player.user.chatFormatDisplay() + ", Is alive: " + player.isAlive + "Is visible " + player.isVisible + " Direction " + player.snake.direction + ", " + player.snake.direction);
         }
     }
 
@@ -233,5 +352,14 @@ public class TronLobby extends Lobby {
 
     public ListChatContext getChat() {
         return (ListChatContext)(chatContext);
+    }
+
+    @Override
+    public List<User> getUsers() {
+        List<User> userlist = new ArrayList<>();
+        for (TronPlayer tronPlayer: players) {
+            userlist.add(tronPlayer.user);
+        }
+        return userlist;
     }
 }

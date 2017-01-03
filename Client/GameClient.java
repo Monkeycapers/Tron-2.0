@@ -15,7 +15,7 @@ public class GameClient extends Jesty.TCPBridge.Client {
 
     //Used for gui commands
     //Todo: default value must be false
-    public boolean isHighRank = true;
+   // public boolean isHighRank = true;
 
     public GameClient(String hostName, int portNumber) {
         super(hostName, portNumber);

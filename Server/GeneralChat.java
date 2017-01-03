@@ -15,6 +15,7 @@ public class GeneralChat extends ChatContext {
 
     @Override
     public void sendMessage(GameServer gameServer, String message) {
+
         //Send the message to all users
         StringWriter stringWriter = new StringWriter();
         new JSONWriter(stringWriter).object()

@@ -2,6 +2,8 @@ package Server;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 /**
  * Created by Evan on 12/6/2016.
  */
@@ -38,5 +40,7 @@ public abstract class Lobby implements Runnable {
     public abstract boolean canConnect(User user);
 
     public abstract int getPlayerCount();
+
+    public abstract List<User> getUsers();
 
 }

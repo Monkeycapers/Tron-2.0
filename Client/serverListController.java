@@ -21,6 +21,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import org.json.JSONWriter;
 
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import java.io.StringWriter;
 import java.net.URL;
@@ -37,10 +38,22 @@ public class serverListController implements Initializable {
     TabPane chatTabPane;
 
     @FXML
-    Menu showLobbyListMenu;
+    MenuItem lobbyListMenuItem;
 
     @FXML
-    Menu signOutMenu;
+    MenuItem signOutMenuItem;
+
+    @FXML
+    MenuItem pmMenuItem;
+
+    @FXML
+    MenuItem kickMenuItem;
+
+    @FXML
+    MenuItem banMenuItem;
+
+    @FXML
+    MenuItem promoteMenuItem;
 
     //User List view
 
@@ -72,31 +85,121 @@ public class serverListController implements Initializable {
 
         //userListView.getItems().addAll("User1", "User2", "User3");
 
-        //Trick the menu into firing an action listener when the menu is pressed without actually showing the menu
-        showLobbyListMenu.getItems().add(new MenuItem(""));
-        showLobbyListMenu.setOnShown(new EventHandler<Event>() {
+        lobbyListMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(Event event) {
+            public void handle(ActionEvent event) {
                 showSetupGui.requestLobbyList();
                 showSetupGui.showAnotherLayout(showSetupGui.lobbyListLayout);
-                showLobbyListMenu.hide();
             }
         });
 
-        signOutMenu.getItems().add(new MenuItem(""));
-        signOutMenu.setOnShown(new EventHandler<Event>() {
+        signOutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(Event event) {
-                //Todo: send a signout message
+            public void handle(ActionEvent event) {
                 StringWriter stringWriter = new StringWriter();
-                new JSONWriter(stringWriter).object()
-                        .key("argument").value("signout")
-                        .endObject();
-                showSetupGui.client.sendMessage(stringWriter.toString());
-                signOutMenu.hide();
+        new JSONWriter(stringWriter).object()
+                .key("argument").value("signout")
+                .endObject();
+        showSetupGui.client.sendMessage(stringWriter.toString());
             }
         });
-        //
+
+        pmMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String item = String.valueOf(userListView.getSelectionModel().getSelectedItem());
+                if (item != null) {
+                    //code to pm a user
+                    StringWriter stringWriter = new StringWriter();
+                    new JSONWriter(stringWriter).object()
+                            .key("argument").value("pmuser")
+                            .key("user").value(item)
+                            .endObject();
+                    showSetupGui.client.sendMessage(stringWriter.toString());
+                    //
+                }
+            }
+        });
+
+        kickMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String item = String.valueOf(userListView.getSelectionModel().getSelectedItem());
+                if (item != null) {
+                    //code to kick a user
+                    //Make a new thread and run it so that the main gui can return while the JOptionPane is open
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String in = JOptionPane.showInputDialog(null, "Kicking User " + item + " \nPlease give a reason: (don't type anything to cancel)");
+                            if (in != null) {
+                                StringWriter stringWriter = new StringWriter();
+                                new JSONWriter(stringWriter).object()
+                                        .key("argument").value("kick")
+                                        .key("user").value(item)
+                                        .key("reason").value(in)
+                                        .endObject();
+                                showSetupGui.client.sendMessage(stringWriter.toString());
+                            }
+                        }
+                    }).start();
+                }
+            }
+        });
+
+        banMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String item = String.valueOf(userListView.getSelectionModel().getSelectedItem());
+                if (item != null) {
+                    //code to kick a user
+                    //Make a new thread and run it so that the main gui can return while the JOptionPane is open
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String in = JOptionPane.showInputDialog(null, "Banning User " + item + " \nPlease give a reason: (don't type anything to cancel)");
+                            if (in != null) {
+                                StringWriter stringWriter = new StringWriter();
+                                new JSONWriter(stringWriter).object()
+                                        .key("argument").value("ban")
+                                        .key("user").value(item)
+                                        .key("reason").value(in)
+                                        .endObject();
+                                showSetupGui.client.sendMessage(stringWriter.toString());
+                            }
+                        }
+                    }).start();
+                }
+            }
+        });
+
+        promoteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String item = String.valueOf(userListView.getSelectionModel().getSelectedItem());
+                if (item != null) {
+                    //code to Promote a user
+                    //Make a new thread and run it so that the main gui can return while the JOptionPane is open
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String in = JOptionPane.showInputDialog(null, "Promoting User " + item + " \nPlease give a Rank to promote to: (don't type anything to cancel)");
+                            if (in != null) {
+                                StringWriter stringWriter = new StringWriter();
+                                new JSONWriter(stringWriter).object()
+                                        .key("argument").value("promote")
+                                        .key("user").value(item)
+                                        .key("rank").value(in)
+                                        .endObject();
+                                showSetupGui.client.sendMessage(stringWriter.toString());
+                            }
+                        }
+                    }).start();
+                }
+            }
+        });
+
+
 
 
         canvas.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -119,68 +222,62 @@ public class serverListController implements Initializable {
             }
         });
 
-
-
-        //todo NOT my code (need to change)
-        userListView.setCellFactory(lv -> {
-
-            ListCell<String> cell = new ListCell<>();
-
-            ContextMenu contextMenu = new ContextMenu();
-
-
-            MenuItem pmItem = new MenuItem();
-            pmItem.textProperty().bind(Bindings.format("Pm \"%s\"", cell.itemProperty()));
-            pmItem.setOnAction(event -> {
-                String item = cell.getItem();
-                // code to pm a user
-                StringWriter stringWriter = new StringWriter();
-                new JSONWriter(stringWriter).object()
-                        .key("argument").value("pmuser")
-                        .key("name").value(item)
-                        .endObject();
-                showSetupGui.client.sendMessage(stringWriter.toString());
-            });
-            contextMenu.getItems().addAll(pmItem);
-
-            //Commands that need authentication
-            if (showSetupGui.client.isHighRank) {
-                MenuItem banItem = new MenuItem();
-                banItem.textProperty().bind(Bindings.format("Ban \"%s\"", cell.itemProperty()));
-                banItem.setOnAction(event -> {
-                    String item = cell.getItem();
-                    //Send a message to ban a user
-                });
-                //contextMenu.getItems().addAll(banItem);
-
-                MenuItem kickItem = new MenuItem();
-                kickItem.textProperty().bind(Bindings.format("Kick \"%s\"", cell.itemProperty()));
-                kickItem.setOnAction(event -> {
-                    String item = cell.getItem();
-                    //Send a message to kick a user
-                });
-
-                MenuItem promoteItem = new MenuItem();
-                promoteItem.textProperty().bind(Bindings.format("Promote \"%s\"", cell.itemProperty()));
-                promoteItem.setOnAction(event -> {
-                    String item = cell.getItem();
-                    //Send a message to promote a user
-                });
-
-                contextMenu.getItems().addAll(kickItem, banItem, promoteItem);
-            }
-
-            cell.textProperty().bind(cell.itemProperty());
-
-            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-                if (isNowEmpty) {
-                    cell.setContextMenu(null);
-                } else {
-                    cell.setContextMenu(contextMenu);
-                }
-            });
-            return cell ;
-        });
+//        userListView.setCellFactory(lv -> {
+//
+//            ListCell<String> cell = new ListCell<>();
+//
+//            ContextMenu contextMenu = new ContextMenu();
+//
+//            MenuItem pmItem = new MenuItem();
+//            pmItem.textProperty().bind(Bindings.format("Pm \"%s\"", cell.itemProperty()));
+//            pmItem.setOnAction(event -> {
+//                String item = cell.getItem();
+//                // code to pm a user
+////                StringWriter stringWriter = new StringWriter();
+////                new JSONWriter(stringWriter).object()
+////                        .key("argument").value("pmuser")
+////                        .key("name").value(item)
+////                        .endObject();
+////                showSetupGui.client.sendMessage(stringWriter.toString());
+//            });
+//            contextMenu.getItems().addAll(pmItem);
+//
+//                MenuItem banItem = new MenuItem();
+//                banItem.textProperty().bind(Bindings.format("Ban \"%s\"", cell.itemProperty()));
+//                banItem.setOnAction(event -> {
+//                    String item = cell.getItem();
+//                    //Send a message to ban a user
+//                });
+//                //contextMenu.getItems().addAll(banItem);
+//
+//                MenuItem kickItem = new MenuItem();
+//                kickItem.textProperty().bind(Bindings.format("Kick \"%s\"", cell.itemProperty()));
+//                kickItem.setOnAction(event -> {
+//                    String item = cell.getItem();
+//                    //Send a message to kick a user
+//                });
+//
+//                MenuItem promoteItem = new MenuItem();
+//                promoteItem.textProperty().bind(Bindings.format("Promote \"%s\"", cell.itemProperty()));
+//                promoteItem.setOnAction(event -> {
+//                    String item = cell.getItem();
+//                    //Send a message to promote a user
+//                });
+//
+//                contextMenu.getItems().addAll(kickItem, banItem, promoteItem);
+//
+//
+//            cell.textProperty().bind(cell.itemProperty());
+//
+//            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+//                if (isNowEmpty) {
+//                    cell.setContextMenu(null);
+//                } else {
+//                    cell.setContextMenu(contextMenu);
+//                }
+//            });
+//            return cell ;
+//        });
 
         chatTabPane.getSelectionModel().selectedItemProperty().addListener(
                 new ChangeListener<Tab>() {

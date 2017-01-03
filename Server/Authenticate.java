@@ -17,12 +17,29 @@ public class Authenticate {
 
     private static Rank[] rankOrder = new Rank[] {Rank.Banned, Rank.Guest, Rank.User, Rank.Op, Rank.Admin};
 
-    public static void setUp() {
-
-    }
+//    public static void setUp() {
+//
+//    }
 
     public static void setFile(File file) {
         usersfile = file;
+        try {
+            if (file.createNewFile()) {
+                //Create the json object
+                StringWriter stringWriter = new StringWriter();
+                new JSONWriter(stringWriter).object()
+                        .key("users").value(new JSONArray())
+                        .endObject();
+
+                PrintWriter out = new PrintWriter(new FileWriter(usersfile));
+                out.print(stringWriter.toString());
+                out.close();
+
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static HashMap<String, Object> authenticate(String name, String pass, boolean unsecure) {
@@ -46,7 +63,7 @@ public class Authenticate {
                             //banned (bad boy!)
                             result.put("result", false);
                             result.put("reason", 2);
-                            result.put("banreason", user.getString("banreason"));
+                            result.put("banreason", user.getString("reason"));
                             return result;
                         }
                         System.out.println("true");
@@ -70,6 +87,27 @@ public class Authenticate {
         }
         result.put("result", false);
         return result;
+    }
+
+    public static String getUserList() {
+        String toReturn = "";
+        try {
+            String in = "";
+            String total = "";
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(usersfile));
+            while ((in = bufferedReader.readLine()) != null) {total += in;}
+            bufferedReader.close();
+            JSONObject jsonObject = new JSONObject(total);
+            List<Object> users = jsonObject.getJSONArray("users").toList();
+            for (Object u: users) {
+                JSONObject user = new JSONObject((HashMap)u);
+                toReturn += "[" +  user.getString("rank") + "] " + user.getString("name") + "\n";
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return toReturn;
     }
 
     public static HashMap<String, Object> signUp(String name, String pass, String email, String rank) {
@@ -157,7 +195,7 @@ public class Authenticate {
                 juser.put("email", user.getEmail());
                 juser.put("rank", user.getRank());
                 if (user.getRank() == Rank.Banned) {
-                    juser.put("banreason", user.getBanReason());
+                    juser.put("reason", user.getBanReason());
                 }
                 users.put(juser);
             }

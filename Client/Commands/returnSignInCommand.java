@@ -20,8 +20,10 @@ public class returnSignInCommand extends Command {
     public String docommand(GameClient gameClient, JSONObject input) {
             if (input.getBoolean("success")) {
                 System.out.println("authed...");
-                //Todo: get the rank from userInfo, to see what the user's rank is
-                gameClient.isHighRank = true;
+
+                showSetupGui.isHighRank = input.getBoolean("highrank");
+                showSetupGui.userDisplayName = input.getString("displayname");
+
                 JSONArray jsonArray = input.getJSONArray("users");
                // showSetupGui.addUser();
                 showSetupGui.showLayout(showSetupGui.outOfMenuLayout);

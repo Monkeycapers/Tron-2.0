@@ -22,10 +22,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -67,6 +69,10 @@ public class showSetupGui extends Application {
 
     public static HashMap<String, String> lobbyListHashMap;
 
+    public static boolean isHighRank = false;
+
+    public static String userDisplayName = "[Guest] guest";
+
     public static void main(String[] args) {
         Application.launch(showSetupGui.class, (java.lang.String[])null);
     }
@@ -106,6 +112,8 @@ public class showSetupGui extends Application {
             HashMap<String, String> defaults = new HashMap<>();
             defaults.put("host", "localhost");
             defaults.put("port", "16000");
+            defaults.put("wallwidth", "10");
+            defaults.put("wallheight", "10");
 
             Settings.setFile(new File("clientsettings.txt"), defaults);
             Settings.load();
@@ -403,5 +411,42 @@ public class showSetupGui extends Application {
                 serverList.chatTabPane.getTabs().clear();
             }
         });
+    }
+    //Synchronized means that other threads must wait for this to be done
+    public static synchronized void render(List<Object> render, int mapWidth, int mapHeight) {
+
+        showSetupGui.updateCanvas();
+        GraphicsContext gc = showSetupGui.canvas.getGraphicsContext2D();
+
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, showSetupGui.canvas.getWidth(), showSetupGui.canvas.getHeight());
+        //Todo: get wall widths and heights from Settings
+        int height = Integer.valueOf(Settings.getProperty("wallheight"));
+        int width = Integer.valueOf(Settings.getProperty("wallwidth"));
+        for (Object object: render) {
+            String renderstring = (String)(object);
+            String[] ints = renderstring.split(",");
+            //double d = 100.0;
+            //System.out.println((int)d);
+            Color color = Color.rgb(Integer.valueOf(ints[0]), Integer.valueOf(ints[1]),  Integer.valueOf(ints[2]));
+            gc.setFill(color);
+            int x = Integer.valueOf(ints[3]);
+            int y = Integer.valueOf(ints[4]);
+            gc.fillRect(width * x, height * y, width, height);
+
+            //System.out.println("RenderString: " + renderstring);
+        }
+        gc.setFill(Color.WHITE);
+        //Top wall
+        gc.fillRect(0, 0, (mapWidth * width), height);
+        //Left wall
+        gc.fillRect(0, 0, width, (mapHeight * height));
+        //Right wall
+        gc.fillRect((mapWidth * width), 0, width, (mapHeight * height));
+        //Bottom wall
+        gc.fillRect(0, (mapHeight * height), (mapWidth * width), height);
+
+        //gc.save();
+
     }
 }

@@ -26,6 +26,8 @@ public class SignUpCommand extends Command {
                     .key("argument").value("returnsignup")
                     .key("success").value(true)
                     .key("users").value(gameServer.getUserList().toArray())
+                    .key("displayname").value(user.chatFormatDisplay())
+                    .key("highrank").value(Authenticate.checkRank(user.getRank(), Rank.Op))
                     .endObject();
             //Add to general chat
             ((GeneralChat)(gameServer.chatContexts.getContext("general"))).userJoinedMessage(gameServer, user);

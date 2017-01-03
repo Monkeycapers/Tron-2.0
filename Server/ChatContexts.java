@@ -1,6 +1,11 @@
 package Server;
 
+import Jesty.TCPBridge.ClientWorker;
+import org.json.JSONWriter;
+
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by S199753733 on 12/21/2016.
@@ -34,9 +39,56 @@ public class ChatContexts {
     }
 
     public void doChatMessage(GameServer gameServer, User user, String name, String message) {
-        ChatContext chatContext = getContext(name);
-        if (chatContext == null) return;
-        chatContext.sendMessage(gameServer, user.chatFormatDisplay() + " " + message);
+        //Inner command messages (stuff that does not have a gui)
+        if (message.startsWith("/")) {
+            String toSend = "";
+            if (message.startsWith("/help")) {
+                //Todo: do help
+                toSend = "List of all inner chat commands:\n" +
+                        "/help (Command) --> Gets help for that command\n" +
+                        "/list [all, online, RankName] --> get a list of users that meet the criteria\n" +
+                        "/ping --> Pong!";
+            }
+            if (message.startsWith("/list all")) {
+                toSend = Authenticate.getUserList();
+            }
+            else if (message.startsWith("/ping")) {
+                toSend = "Pong";
+            }
+            else if (message.startsWith("/list lobby")) {
+                Lobby lobby = user.getCurrentLobby();
+                if (lobby != null) {
+                    List<User> users = lobby.getUsers();
+                    for (User u: users) {
+                        toSend += u.chatFormatDisplay() + "\n";
+                    }
+                }
+            }
+            else if (message.startsWith("/list clients")) {
+                if (Authenticate.checkRank(user.getRank(), Rank.Op)) {
+                    for (ClientWorker w: gameServer.getClients()) {
+                        toSend += w.toString() + "\n";
+                    }
+                }
+            }
+
+            if (!toSend.isEmpty()) {
+                StringWriter stringWriter = new StringWriter();
+                new JSONWriter(stringWriter).object()
+                        .key("argument").value("chatmessage")
+                        .key("name").value("Server-->" + user.getName())
+                        .key("displayname").value("Server")
+                        .key("message").value(toSend)
+                        .endObject();
+                user.clientWorker.sendMessage(stringWriter.toString());
+            }
+
+        }
+        else {
+            ChatContext chatContext = getContext(name);
+            if (chatContext == null) return;
+            chatContext.sendMessage(gameServer, user.chatFormatDisplay() + " " + message);
+        }
     }
 
     public void removeUser(User user) {

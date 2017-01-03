@@ -3,6 +3,7 @@ package Client.Commands;
 import Client.GameClient;
 import Client.showSetupGui;
 import Client.signinController;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -19,7 +20,14 @@ public class returnSignUpCommand extends Command {
     public String docommand(GameClient gameClient, JSONObject input) {
         if (input.getBoolean("success")) {
             System.out.println("authed...");
-            //Todo: setup the next gui
+
+            showSetupGui.isHighRank = input.getBoolean("highrank");
+            showSetupGui.userDisplayName = input.getString("displayname");
+
+            JSONArray jsonArray = input.getJSONArray("users");
+            showSetupGui.showLayout(showSetupGui.outOfMenuLayout);
+            showSetupGui.addUsers(jsonArray.toList());
+
             showSetupGui.showLayout(showSetupGui.outOfMenuLayout);
         }
         else {

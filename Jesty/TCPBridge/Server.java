@@ -48,6 +48,8 @@ public abstract class Server {
         try {
             //Cut of the PC name part of the ip address
             System.out.println("The IP Address of the Server: " + InetAddress.getLocalHost().toString().split("/")[1]);
+            System.out.println("Raw port: " + raw_port);
+            System.out.println("Web port: " + web_port);
         }
         catch (Exception e) {
             System.out.println("The IP Address of the Server: localhost");
