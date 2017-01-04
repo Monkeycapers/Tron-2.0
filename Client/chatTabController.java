@@ -45,6 +45,7 @@ public class chatTabController implements Initializable {
                 //System.out.println("handling: " + src.getText());
                 showSetupGui.handleChatMessage(name, src.getText());
                 src.setText("");
+                updateUserLabel();
             }
         });
 
@@ -53,14 +54,23 @@ public class chatTabController implements Initializable {
             public void changed(ObservableValue<?> observable, Object oldValue,
                                 Object newValue) {
                 chatTextArea.setScrollTop(Double.MAX_VALUE);
+                updateUserLabel();
             }
         });
+        updateUserLabel();
     }
 
     public int addPendingMessage() {
         pendingMessageCount = pendingMessageCount + 1;
         System.out.println("Pending messages: " + pendingMessageCount);
         return pendingMessageCount;
+    }
+
+    public void updateUserLabel() {
+        if (showSetupGui.userDisplayName.length() > 29) {
+            showSetupGui.userDisplayName = showSetupGui.userDisplayName.substring(0, 29) + "...";
+        }
+        chatLabel.setText(showSetupGui.userDisplayName);
     }
 
 

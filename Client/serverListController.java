@@ -1,5 +1,7 @@
 package Client;
 
+import Jesty.Settings;
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -12,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -77,6 +80,46 @@ public class serverListController implements Initializable {
         //Force the canvas to register all key inputs
         canvas.setFocusTraversable(true);
         canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
+        new AnimationTimer() {
+            public void handle(long currentNanoTime) {
+
+                int height = Integer.valueOf(Settings.getProperty("wallheight"));
+                int width = Integer.valueOf(Settings.getProperty("wallwidth"));
+
+                GraphicsContext gc = showSetupGui.canvas.getGraphicsContext2D();
+
+                gc.setFill(Color.BLACK);
+
+                gc.clearRect(0, 0, showSetupGui.canvas.getWidth(), showSetupGui.canvas.getHeight());
+                gc.fillRect(0, 0, showSetupGui.mapWidth * width, showSetupGui.mapHeight * height);
+
+
+                for (Object object: showSetupGui.render) {
+                    String renderstring = (String)(object);
+                    String[] ints = renderstring.split(",");
+                    //double d = 100.0;
+                    //System.out.println((int)d);
+                    Color color = Color.rgb(Integer.valueOf(ints[0]), Integer.valueOf(ints[1]),  Integer.valueOf(ints[2]));
+                    gc.setFill(color);
+                    int x = Integer.valueOf(ints[3]);
+                    int y = Integer.valueOf(ints[4]);
+                    gc.fillRect(width * x, height * y, width, height);
+
+                    //System.out.println("RenderString: " + renderstring);
+                }
+                gc.setFill(Color.WHITE);
+                //Top wall
+                gc.fillRect(0, 0, (showSetupGui.mapWidth * width), height);
+                //Left wall
+                gc.fillRect(0, 0, width, (showSetupGui.mapHeight * height));
+                //Right wall
+                gc.fillRect((showSetupGui.mapWidth * width), 0, width, (showSetupGui.mapHeight * height));
+                //Bottom wall
+                gc.fillRect(0, (showSetupGui.mapHeight * height), (showSetupGui.mapWidth * width), height);
+
+                //gc.save();
+            }
+        }.start();
         //
         tabControllerHashMap = new HashMap<>();
 //        chatTabPane.getTabs().add(getNewTab("Wow!", "Wow"));

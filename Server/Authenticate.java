@@ -3,6 +3,7 @@ package Server;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.*;
 import java.util.HashMap;
@@ -58,7 +59,8 @@ public class Authenticate {
                 //JSONObject user = new JSONObject((String)u.toString().replaceAll("=", ":"));
                 //
                 if (user.getString("name").equals(name)) {
-                    if (user.getString("pass").equals(pass) || unsecure) {
+                    //Check the hash
+                    if (BCrypt.checkpw(pass, user.getString("pass")) || unsecure) {
                         if (user.getString("rank").equals("Banned") && !unsecure) {
                             //banned (bad boy!)
                             result.put("result", false);
@@ -127,7 +129,8 @@ public class Authenticate {
                 JSONArray users = jsonObject.getJSONArray("users");
                 JSONObject user = new JSONObject();
                 user.put("name", name);
-                user.put("pass", pass);
+                //Hash the password
+                user.put("pass", BCrypt.hashpw(pass, BCrypt.gensalt()));
                 user.put("email", email);
                 user.put("rank", rank);
                 users.put(user);

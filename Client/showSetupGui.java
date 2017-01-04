@@ -15,6 +15,7 @@ import Jesty.test.testServer;
 import Server.GameServer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,6 +27,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -66,9 +68,15 @@ public class showSetupGui extends Application {
 
     public static HashMap<String, String> lobbyListHashMap;
 
+    public static List<Object> render;
+
     public static boolean isHighRank = false;
 
     public static String userDisplayName = "[Guest] guest";
+
+    public static int mapWidth = 0;
+
+    public static int mapHeight = 0;
 
     public static void main(String[] args) {
         Application.launch(showSetupGui.class, (java.lang.String[])null);
@@ -100,7 +108,7 @@ public class showSetupGui extends Application {
     public void start(Stage primaryStage) {
         try {
             //This is where all of the gui's are initially loaded (not shown), and the client is started.
-
+            render = new ArrayList<>();
             chatTabHashMap = new HashMap<>();
 
             lobbyListHashMap = new HashMap<>();
@@ -134,9 +142,19 @@ public class showSetupGui extends Application {
 
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
+
             stage = primaryStage;
+
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    System.exit(1);
+                }
+            });
+
             stage.setScene(scene);
             stage.show();
+
 
 //            GameServer gameServer =  new GameServer(16000, 8080);
 //            gameServer.start();
@@ -450,37 +468,11 @@ public class showSetupGui extends Application {
     public static synchronized void render(List<Object> render, int mapWidth, int mapHeight) {
 
         showSetupGui.updateCanvas();
-        GraphicsContext gc = showSetupGui.canvas.getGraphicsContext2D();
 
-        gc.setFill(Color.BLACK);
-        gc.fillRect(0, 0, showSetupGui.canvas.getWidth(), showSetupGui.canvas.getHeight());
-        //Todo: get wall widths and heights from Settings
-        int height = Integer.valueOf(Settings.getProperty("wallheight"));
-        int width = Integer.valueOf(Settings.getProperty("wallwidth"));
-        for (Object object: render) {
-            String renderstring = (String)(object);
-            String[] ints = renderstring.split(",");
-            //double d = 100.0;
-            //System.out.println((int)d);
-            Color color = Color.rgb(Integer.valueOf(ints[0]), Integer.valueOf(ints[1]),  Integer.valueOf(ints[2]));
-            gc.setFill(color);
-            int x = Integer.valueOf(ints[3]);
-            int y = Integer.valueOf(ints[4]);
-            gc.fillRect(width * x, height * y, width, height);
+        showSetupGui.render = render;
+        showSetupGui.mapWidth = mapWidth;
+        showSetupGui.mapHeight = mapHeight;
 
-            //System.out.println("RenderString: " + renderstring);
-        }
-        gc.setFill(Color.WHITE);
-        //Top wall
-        gc.fillRect(0, 0, (mapWidth * width), height);
-        //Left wall
-        gc.fillRect(0, 0, width, (mapHeight * height));
-        //Right wall
-        gc.fillRect((mapWidth * width), 0, width, (mapHeight * height));
-        //Bottom wall
-        gc.fillRect(0, (mapHeight * height), (mapWidth * width), height);
-
-        //gc.save();
 
     }
 }
