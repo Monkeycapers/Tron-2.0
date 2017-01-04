@@ -135,9 +135,13 @@ public class TronLobby extends Lobby {
             chatContext.sendMessage(null, "Waiting for 1 more player...");
             tronState = TronState.WAITING;
         }
-        user.setCurrentLobby(null);
+        //user.setCurrentLobby(null);
+        //Transfer ownership
+        if (player == creator && !players.isEmpty()) {
+            creator = players.get(0);
+        }
         //Determine if the lobby needs to be dissolved
-        return players.isEmpty() || player == creator;
+        return players.isEmpty();
     }
 
     @Override

@@ -54,7 +54,7 @@ public class Authenticate {
             JSONObject jsonObject = new JSONObject(total);
             List<Object> users = jsonObject.getJSONArray("users").toList();
             for (Object u: users) {
-                System.out.println((String)u.toString());
+                //System.out.println((String)u.toString());
                 JSONObject user = new JSONObject((HashMap)u);
                 //JSONObject user = new JSONObject((String)u.toString().replaceAll("=", ":"));
                 //
@@ -68,7 +68,7 @@ public class Authenticate {
                             result.put("banreason", user.getString("reason"));
                             return result;
                         }
-                        System.out.println("true");
+                        //System.out.println("true");
                         result.put("result", true);
                         result.put("name", user.getString("name"));
                         result.put("email", user.getString("email"));
@@ -78,10 +78,10 @@ public class Authenticate {
                 }
             }
             result.put("reason", 0);
-            System.out.println("printing users");
-            for (Object o: users) {
-                System.out.println(o);
-            }
+//            System.out.println("printing users");
+//            for (Object o: users) {
+//                System.out.println(o);
+//            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -114,6 +114,7 @@ public class Authenticate {
 
     public static HashMap<String, Object> signUp(String name, String pass, String email, String rank) {
         HashMap<String, Object> result = new HashMap<>();
+
         try {
             //Check if the user does not exist
             HashMap<String, Object> checkisalreadyauth = authenticate(name, pass, false);
@@ -138,7 +139,7 @@ public class Authenticate {
                 
                 JSONObject jsonObject1 = new JSONObject();
                 jsonObject1.put("users", users);
-                System.out.println("JSonObject1 : " + jsonObject1.toString());
+                //System.out.println("JSonObject1 : " + jsonObject1.toString());
 
                PrintWriter out = new PrintWriter(new FileWriter(usersfile));
                out.print(jsonObject1.toString());
@@ -176,7 +177,7 @@ public class Authenticate {
             while ((in = bufferedReader.readLine()) != null) {total += in;}
             bufferedReader.close();
             JSONObject jsonObject = new JSONObject(total);
-            System.out.println("jsonobject: " + jsonObject);
+            //System.out.println("jsonobject: " + jsonObject);
             JSONArray users = jsonObject.getJSONArray("users");
             int index = 0;
             int indexOfUser = -1;
@@ -209,7 +210,7 @@ public class Authenticate {
                     .key("users")
                     .value(users)
                     .endObject();
-            System.out.println("Out: " + stringWriter.toString());
+            //System.out.println("Out: " + stringWriter.toString());
             PrintWriter out = new PrintWriter(new FileWriter(usersfile));
             out.print(stringWriter.toString());
             out.close();
@@ -229,7 +230,7 @@ public class Authenticate {
             while ((in = bufferedReader.readLine()) != null) {total += in;}
             bufferedReader.close();
             JSONObject jsonObject = new JSONObject(total);
-            System.out.println("jsonobject: " + jsonObject);
+            //System.out.println("jsonobject: " + jsonObject);
             JSONArray users = jsonObject.getJSONArray("users");
             int index = 0;
             int indexOfUser = -1;

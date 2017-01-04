@@ -67,6 +67,7 @@ public class Lobbys {
                     e.printStackTrace();
                 }
             }
+            user.setCurrentLobby(null);
         }
     }
 

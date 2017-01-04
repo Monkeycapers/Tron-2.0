@@ -91,6 +91,25 @@ public class ChatContexts {
                 }
             }
 
+            else if (message.startsWith("/snake")) {
+                if (user.getCurrentLobby() == null) {
+                    SingleUserChatContext chatContext = new SingleUserChatContext(user, "Snake-->" + user.getName(), "Snake");
+                    addNewContext(chatContext);
+                    SnakeLobby snakeLobby = new SnakeLobby(user, chatContext);
+                    user.setCurrentLobby(snakeLobby);
+                    gameServer.lobbys.addNewLobby(snakeLobby);
+                    snakeLobby.start();
+                }
+            }
+
+            else if (message.startsWith("/leavelobby")) {
+                Lobby lobby = user.getCurrentLobby();
+                if (lobby != null) {
+                    gameServer.lobbys.removeUser(lobby, user);
+                    toSend = "Left the lobby";
+                }
+            }
+
             if (!toSend.isEmpty()) {
                 StringWriter stringWriter = new StringWriter();
                 new JSONWriter(stringWriter).object()
