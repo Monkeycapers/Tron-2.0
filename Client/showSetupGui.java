@@ -23,6 +23,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -77,6 +79,8 @@ public class showSetupGui extends Application {
     public static int mapWidth = 0;
 
     public static int mapHeight = 0;
+
+    private static boolean isUp, isDown, isLeft, isRight;
 
     public static void main(String[] args) {
         Application.launch(showSetupGui.class, (java.lang.String[])null);
@@ -235,6 +239,62 @@ public class showSetupGui extends Application {
                     if (scene == null) {
                         scene = new Scene(layout);
                     }
+
+                    if (layout == outOfMenuLayout) {
+                        scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+                            @Override
+                            public void handle(KeyEvent event) {
+                                String tosend = "";
+                                //System.out.println("Key down");
+                                if ((event.getCode() == KeyCode.W || event.getCode() == KeyCode.UP) && !isUp) {
+                                    tosend = "W"; //UP
+                                    isUp = true;
+                                }
+                                else if ((event.getCode() == KeyCode.S || event.getCode() == KeyCode.DOWN) && !isDown){
+                                    tosend = "S"; //DOWN
+                                    isDown = true;
+                                }
+                                else if ((event.getCode() == KeyCode.D || event.getCode() == KeyCode.RIGHT)  && !isRight){
+                                    tosend = "D"; //RIGHT
+                                    isRight = true;
+                                }
+                                else if ((event.getCode() == KeyCode.A || event.getCode() == KeyCode.LEFT) && !isLeft) {
+                                    tosend = "A"; //LEFT
+                                    isLeft = true;
+                                }
+
+                                if (!tosend.equals("")) {
+                                    //System.out.println("sending a key message");
+                                    StringWriter stringWriter = new StringWriter();
+                                    new JSONWriter(stringWriter).object()
+                                            .key("argument").value("lobbymessage")
+                                            .key("type").value("key")
+                                            .key("key").value(tosend).endObject();
+                                    showSetupGui.client.sendMessage(stringWriter.toString());
+                                }
+                            }
+                        });
+
+                        scene.addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
+                            @Override
+                            public void handle(KeyEvent event) {
+                                //System.out.println("Key Up");
+                                if (event.getCode() == KeyCode.W || event.getCode() == KeyCode.UP) {
+                                    isUp = false;
+                                }
+                                else if (event.getCode() == KeyCode.S || event.getCode() == KeyCode.DOWN){
+                                    isDown = false;
+                                }
+                                else if (event.getCode() == KeyCode.D || event.getCode() == KeyCode.RIGHT){
+                                    isRight = false;
+                                }
+                                else if (event.getCode() == KeyCode.A || event.getCode() == KeyCode.LEFT) {
+                                    isLeft = false;
+                                }
+                            }
+                        });
+                    }
+
                     stage.setScene(scene);
                     stage.show();
                 }

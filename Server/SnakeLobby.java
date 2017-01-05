@@ -26,6 +26,10 @@ public class SnakeLobby extends Lobby {
 
     private Body food;
 
+    private Direction changeToDirection;
+
+    private boolean doNotAcceptKeyInput = false;
+
     public SnakeLobby (User user, ChatContext chatContext) {
         this.chatContext = chatContext;
         this.user = user;
@@ -34,6 +38,7 @@ public class SnakeLobby extends Lobby {
         this.name = user.getName() + "`s snake game";
         isRunning = true;
         snake = new Snake(1, Direction.DOWN, SnakeType.SNAKE);
+        //changeToDirection = Direction.DOWN;
         loadProps();
         reset();
     }
@@ -48,24 +53,32 @@ public class SnakeLobby extends Lobby {
 
     @Override
     public void onMessage(User user, JSONObject input) {
-        if (input.getString("type").equals("key")) {
+        if (input.getString("type").equals("key") && !doNotAcceptKeyInput){
             //Key input
             String key = input.getString("key");
             //Up
             if (key.equals("W") && !(snake.direction == Direction.DOWN)) {
-                snake.direction = Direction.UP;
+                changeToDirection = Direction.UP;
+                doNotAcceptKeyInput = true;
+                //snake.direction = Direction.UP;
             }
             //Down
             else if (key.equals("S") && !(snake.direction == Direction.UP)) {
-                snake.direction = Direction.DOWN;
+                changeToDirection = Direction.DOWN;
+                doNotAcceptKeyInput = true;
+                //snake.direction = Direction.DOWN;
             }
             //Left
             else if (key.equals("A") && !(snake.direction == Direction.RIGHT)) {
-                snake.direction = Direction.LEFT;
+                changeToDirection = Direction.LEFT;
+                doNotAcceptKeyInput = true;
+                //snake.direction = Direction.LEFT;
             }
             //Right
             else if (key.equals("D") && !(snake.direction == Direction.LEFT)) {
-                snake.direction = Direction.RIGHT;
+                changeToDirection = Direction.RIGHT;
+                doNotAcceptKeyInput = true;
+                //snake.direction = Direction.RIGHT;
             }
         }
     }
@@ -91,30 +104,40 @@ public class SnakeLobby extends Lobby {
     @Override
     public void pause() {}
 
+    boolean inVerse = false;
+
     @Override
     public void run() {
         while (isRunning) {
-            snake.tick1();
+
+            snake.direction = changeToDirection;
+
+            doNotAcceptKeyInput = false;
+
             boolean doReset = false;
-            if (snake.head.xCord > mapWidth || snake.head.xCord < 0 || snake.head.yCord > mapHeight || snake.head.yCord < 0) {
-                doReset = true;
-            }
-            for (Body body: snake.body) {
-                if (snake.head.xCord == body.xCord && snake.head.yCord == body.yCord) {
+
+                snake.tick1();
+
+                if (snake.head.xCord > mapWidth || snake.head.xCord < 0 || snake.head.yCord > mapHeight || snake.head.yCord < 0) {
                     doReset = true;
                 }
-            }
-            if (!doReset && snake.head.xCord == food.xCord && snake.head.yCord == food.yCord) {
-                chatContext.sendMessage(null, "Your score: " + snake.body.size());
-                food = randomFood();
-                doReset = (food == null);
-                if (!doReset) {
-                    snake.body.push(food);
+                for (Body body: snake.body) {
+                    if (snake.head.xCord == body.xCord && snake.head.yCord == body.yCord) {
+                        doReset = true;
+                    }
                 }
-            }
+                if (!doReset && snake.head.xCord == food.xCord && snake.head.yCord == food.yCord) {
+                    chatContext.sendMessage(null, "Your score: " + snake.body.size());
+                    food = randomFood();
+                    doReset = (food == null);
+                    if (!doReset) {
+                        snake.body.push(food);
+                    }
+                }
             if (doReset) {
                 reset();
             }
+
             else {
                 snake.tick2();
 
@@ -146,9 +169,12 @@ public class SnakeLobby extends Lobby {
     }
 
     public void reset() {
+
         chatContext.sendMessage(null, "Resetting...\nYour score was " + snake.body.size());
         snake.reset();
         food = randomFood();
+        changeToDirection = Direction.DOWN;
+
     }
 
     private Body randomFood() {
@@ -164,7 +190,7 @@ public class SnakeLobby extends Lobby {
         return body;
 
     }
-    //Produce vibrant colors, that can't be black (in theory)
+    //Produce vibrant colors, that can't be grayscale (in theory)
     private Color getRandomColor() {
         int r = (int)(Math.random() * 3);
         int r1 = (55 + (int)(Math.random() * 200));
@@ -219,6 +245,7 @@ public class SnakeLobby extends Lobby {
         //Check if the body is valid
         boolean failed = false;
         if (body.xCord == snake.head.xCord && body.yCord == snake.head.yCord) failed = true;
+        if (body.xCord == mapWidth / 2 && body.yCord == mapHeight / 2) failed = true;
         for (Body b: snake.body) {
             if (b.xCord == body.xCord && b.yCord == body.yCord) {
                 failed = true;

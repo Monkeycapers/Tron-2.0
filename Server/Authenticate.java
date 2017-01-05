@@ -152,6 +152,7 @@ public class Authenticate {
                 return result;
             }
             else {
+                System.out.println("false because user exists");
                 //User already exists, or an error occurred
                 //Todo: implemet reason why
                 //...//
@@ -165,6 +166,7 @@ public class Authenticate {
         catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("false because ???");
         result.put("result", false);
         return result;
     }

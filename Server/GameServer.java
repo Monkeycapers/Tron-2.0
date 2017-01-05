@@ -62,6 +62,10 @@ public class GameServer extends Server {
 
     @Override
     public void onMessage(ClientWorker clientWorker, String message) {
+        handleMessage(clientWorker, message);
+    }
+
+    public synchronized void handleMessage(ClientWorker clientWorker, String message) {
         try {
             User user = (User)(clientWorker.clientData);
             JSONObject jsonObject = new JSONObject(message);
@@ -75,7 +79,7 @@ public class GameServer extends Server {
         }
         catch (JSONException e) {
             e.printStackTrace();
-           // System.out.println("invalid format: " + e.getMessage());
+            // System.out.println("invalid format: " + e.getMessage());
             //Todo: send this back to the client
         }
         catch (Exception e) {
@@ -102,6 +106,10 @@ public class GameServer extends Server {
 
     @Override
     public void onClose(ClientWorker clientWorker, int code) {
+        handleClose(clientWorker);
+    }
+
+    public synchronized void handleClose(ClientWorker clientWorker) {
         User user = (User)(clientWorker.clientData);
         users.remove(user);
         chatContexts.removeUser(user);
@@ -128,11 +136,13 @@ public class GameServer extends Server {
 
     @Override
     public void onOpen(ClientWorker clientWorker, int code) {
+        handleOpen(clientWorker);
+    }
+
+    public synchronized void handleOpen(ClientWorker clientWorker) {
         User user = new User(clientWorker);
         users.add(user);
         clientWorker.clientData = user;
-
-
     }
 
     public User getUserByName(String name) {

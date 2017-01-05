@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -74,6 +75,8 @@ public class serverListController implements Initializable {
     HashMap<String, Tab> tabNameHashMap;
 
 
+
+
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         System.out.println("Init Server List Gui");
@@ -83,6 +86,8 @@ public class serverListController implements Initializable {
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
 
+                showSetupGui.updateCanvas();
+
                 int height = Integer.valueOf(Settings.getProperty("wallheight"));
                 int width = Integer.valueOf(Settings.getProperty("wallwidth"));
 
@@ -90,7 +95,7 @@ public class serverListController implements Initializable {
 
                 gc.setFill(Color.BLACK);
 
-                gc.clearRect(0, 0, showSetupGui.canvas.getWidth(), showSetupGui.canvas.getHeight());
+                gc.clearRect(0, 0, showSetupGui.mapWidth * width, showSetupGui.mapHeight * height);
                 gc.fillRect(0, 0, showSetupGui.mapWidth * width, showSetupGui.mapHeight * height);
 
 
@@ -117,7 +122,7 @@ public class serverListController implements Initializable {
                 //Bottom wall
                 gc.fillRect(0, (showSetupGui.mapHeight * height), (showSetupGui.mapWidth * width), height);
 
-                //gc.save();
+                gc.save();
             }
         }.start();
         //
@@ -245,25 +250,6 @@ public class serverListController implements Initializable {
 
 
 
-        canvas.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                String tosend = "";
-                if (event.getCode() == KeyCode.W || event.getCode() == KeyCode.UP) tosend = "W"; //UP
-                else if (event.getCode() == KeyCode.S || event.getCode() == KeyCode.DOWN) tosend = "S"; //DOWN
-                else if (event.getCode() == KeyCode.D || event.getCode() == KeyCode.RIGHT) tosend = "D"; //RIGHT
-                else if (event.getCode() == KeyCode.A || event.getCode() == KeyCode.LEFT) tosend = "A"; //LEFT
-                if (!tosend.equals("")) {
-                    System.out.println("sending a key message");
-                    StringWriter stringWriter = new StringWriter();
-                    new JSONWriter(stringWriter).object()
-                            .key("argument").value("lobbymessage")
-                            .key("type").value("key")
-                            .key("key").value(tosend).endObject();
-                    showSetupGui.client.sendMessage(stringWriter.toString());
-                }
-            }
-        });
 
 //        userListView.setCellFactory(lv -> {
 //
