@@ -10,7 +10,11 @@ import org.json.JSONObject;
 /**
  * Created by S199753733 on 12/21/2016.
  *
- * Used for the actual chat message
+ * Used to handle chat messages, simply calls chatContexts
+ *
+ * Arguments: String name, String message
+ *
+ * Does not return
  */
 public class ChatMessageCommand extends Command {
 

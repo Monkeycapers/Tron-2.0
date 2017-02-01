@@ -14,6 +14,9 @@ import java.util.ResourceBundle;
 
 /**
  * Created by Evan on 1/1/2017.
+ *
+ * Javafx controller class for the Connect gui, that gets the hostname and portnumber from the user and attempts to
+ * connect to the server.
  */
 public class connectController implements Initializable {
 
@@ -39,7 +42,7 @@ public class connectController implements Initializable {
                         @Override
                         public void run() {
                             showSetupGui.showLayout(showSetupGui.rootLayout);
-                            String host = "localhost";
+                            String host = hostField.getText();
                             int port = Integer.parseInt(portField.getText());
                             //inputs are good, save them
                             Settings.setProperty("host", host);

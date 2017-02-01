@@ -3,9 +3,13 @@ package Server;
 import org.json.JSONWriter;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Evan on 12/22/2016.
+ *
+ * A private message chatcontext between two users
  */
 public class PmChat extends ChatContext {
 
@@ -18,11 +22,11 @@ public class PmChat extends ChatContext {
     }
 
     @Override
-    public void sendMessage(GameServer gameServer, String message) {
-        sendMessage(gameServer, message, false);
+    public void sendMessage(String message) {
+        sendMessage(message, false);
     }
-
-    public void sendMessage(GameServer gameServer, String message, boolean starter) {
+    //If starter, only send the message to the starter of the pm (u1)
+    public void sendMessage(String message, boolean starter) {
         //Todo: make this efficient
         StringWriter stringWriter = new StringWriter();
         String displayname = "Error";
@@ -43,7 +47,7 @@ public class PmChat extends ChatContext {
                 .key("message").value(message).endObject();
         if (!starter) u2.clientWorker.sendMessage(stringWriter2.toString());
     }
-
+    //Figure out what user the target user is (the user who did NOT disconnect), and send closeChat command to the target, then close the lobby
     @Override
     public boolean removeUser(User user) {
         User target = null;
@@ -60,5 +64,13 @@ public class PmChat extends ChatContext {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<User> getUsers() {
+        ArrayList<User> users = new ArrayList<>();
+        users.add(u1);
+        users.add(u2);
+        return users;
     }
 }

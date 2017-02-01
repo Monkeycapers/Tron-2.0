@@ -42,7 +42,6 @@ public class ClientWorker implements Runnable {
         this.socket = socket;
         socketType = SocketType.RAW_SOCKET;
         this.server = server;
-        //System.out.println(server);
     }
 
     public ClientWorker(int id, WebSocket socket, Server server) {
@@ -105,6 +104,7 @@ public class ClientWorker implements Runnable {
         if (socketType == SocketType.RAW_SOCKET) {
             try {
                 out.writeUTF((String)(data));
+//                out.write(((String)(data)).toCharArray().);
             }
             catch (SocketException e) {
                 disconnect();
@@ -160,7 +160,7 @@ public class ClientWorker implements Runnable {
             address = socket.getInetAddress();
         }
         else {
-            address = socket.getInetAddress();
+            address = webSocket.getRemoteSocketAddress().getAddress();
         }
         return "Socket type: " + socketType + ", ip:" +  address;
     }

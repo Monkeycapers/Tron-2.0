@@ -15,6 +15,8 @@ import java.util.ResourceBundle;
 
 /**
  * Created by Evan on 1/1/2017.
+ *
+ * Javafx controller class for the lobby list gui, goal is to allow users to create or join lobbys.
  */
 public class lobbyListController implements Initializable {
 

@@ -6,6 +6,12 @@ import java.util.HashMap;
 
 /**
  * Created by S199753733 on 12/6/2016.
+ *
+ * The User class contains a user's name, email, rank, currentLobby, and the user's clientWorker.
+ *
+ * It is designed to be secure, so it is marked final and has private variables, except for the Clientworker.
+ *
+ * This means the only way a User can get a name, rank, email etc is through the methods below.
  */
 
 //Final means that the class cannot be extended, making it more secure
@@ -28,18 +34,6 @@ public final class User {
         this.rank = Rank.Guest;
         this.clientWorker = clientWorker;
     }
-
-//    public User(ClientWorker clientWorker, String name, String securepass) {
-//        //...//
-//        this.clientWorker = clientWorker;
-//        authenticate(name, securepass);
-//    }
-//
-//    public User(ClientWorker clientWorker, String securetoken) {
-//        //...//
-//        this.clientWorker = clientWorker;
-//        authenticate(securetoken);
-//    }
 
     public authenticationstatus authenticate(String name, String securepass) {
         //...//
@@ -99,7 +93,9 @@ public final class User {
         this.rank = rank;
         return Authenticate.update(this);
     }
+    //Get methods for the Rank, email, name, currentLobby
 
+    //Sett methods for banReason and CurrentLobby
     public Rank getRank() {
         return rank;
     }
@@ -132,7 +128,7 @@ public final class User {
     public void setBanReason(String reason) {
             banreason = reason;
     }
-
+    //What the Users name looks like in all chats
     public String chatFormatDisplay() {
         return "[" + rank + "] " + name;
     }

@@ -3,9 +3,15 @@ package Client;
 /**
  * Created by Evan on 12/15/2016.
  */
-import java.io.File;
-import java.io.StringWriter;
+import java.awt.*;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,24 +21,40 @@ import Jesty.test.testServer;
 import Server.GameServer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
+
+import javax.swing.*;
+
+/*
+The class that holds everything together. It's job is to load everything (Settings, gameClient, all of the gui's), and to
+provide methods to update guis and handle guis.
+
+ */
 
 public class showSetupGui extends Application {
 
@@ -46,6 +68,8 @@ public class showSetupGui extends Application {
 
     public static Pane lobbyListLayout;
 
+    public static Pane offlineUserActionLayout;
+
     //public static Pane loadingLayout;
 
     public static Stage stage;
@@ -57,6 +81,8 @@ public class showSetupGui extends Application {
     public static FXMLLoader connectLoader;
 
     public static FXMLLoader lobbyListLoader;
+
+    public static FXMLLoader offlineUserActionLoader;
 
     public static GameClient client;
 
@@ -187,47 +213,21 @@ public class showSetupGui extends Application {
             lobbyListLoader.setLocation(showSetupGui.class.getResource("lobbylist.fxml"));
             lobbyListLayout = lobbyListLoader.load();
 
+            offlineUserActionLoader = new FXMLLoader();
+            offlineUserActionLoader.setLocation(showSetupGui.class.getResource("Offline User Action.fxml"));
+            offlineUserActionLayout = offlineUserActionLoader.load();
+
             //The gui's are loaded, safe to load the client
             // (if this was done before the gui loading code, there would be a null pointer exception)
-            client =  new GameClient(host, Integer.valueOf(port));
+            client =  new GameClient(host, Integer.parseInt(port));
             client.start();
             //
-
-//            Scene scene = new Scene(outOfMenuLayout);
-//            stage = primaryStage;
-//            stage.setScene(scene);
-//            stage.show();
-
-//            try {Thread.sleep(100);}catch (Exception e) { }
-//            while (true) {
-//                System.out.print(">");
-//                client.sendMessage(new Scanner(System.in).nextLine());
-//            }
-
-            System.out.println(this.getClass().toString());
             new Thread(new ConsoleThread()).start();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-//    public static void showOutOfGameMenu() {
-//
-//            Platform.runLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        Scene scene = new Scene(outOfMenuLayout);
-//                        stage.setScene(scene);
-//                        stage.show();
-//                    } catch(Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//
-//    }
 
     //Replace the current gui with another gui
     public static void showLayout(Pane layout) {
@@ -362,6 +362,20 @@ public class showSetupGui extends Application {
             Settings.load();
             toSend = "Updated propertys.\n" + Settings.listPropertys();
         }
+
+        else if (text.startsWith(".rob")) {
+            //FORD
+            pushImage("Client-->local", "Client", new ImageView(new File("rob.png").toURI().toString()));
+        }
+        else if (text.startsWith(".upload")) {
+            FileChooser fileChooser = new FileChooser();
+            File file = fileChooser.showOpenDialog(showSetupGui.stage.getOwner());
+            if (file != null) {
+                //toSend = file.getName();
+                uploadToServer(file, name);
+            }
+            //uploadToServer("rob.png", name);
+        }
         //Does not match internal commands, send message to server
         else {
             StringWriter stringWriter = new StringWriter();
@@ -378,13 +392,73 @@ public class showSetupGui extends Application {
         }
     }
 
-//    public static String listPropertys() {
-//        String toSend = "Propertys: " + "\n";
-//        for (Map.Entry<String, String> entry:Settings.getPropertys().entrySet()) {
-//            toSend += entry.getKey() + ":" + entry.getValue() + "\n";
-//        }
-//        return toSend;
-//    }
+    public static void uploadToServer(File file, String chat) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String url = "http://localhost:8000/U";
+                String charset = "UTF-8";
+                String param = chat;
+                //File textFile = new File("/path/to/file.txt");
+                File binaryFile = file;
+                String boundary = Long.toHexString(System.currentTimeMillis()); // Just generate some unique random value.
+                String CRLF = "\r\n"; // Line separator required by multipart/form-data.
+                URLConnection connection = null;
+
+                try {
+                    connection = new URL(url).openConnection();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+
+                try (
+
+                        OutputStream output = connection.getOutputStream();
+                        PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
+                ) {
+                    // Send normal param.
+                    writer.append("--" + boundary).append(CRLF);
+                    writer.append("Content-Disposition: form-data; name=\"param\"; filename=\"" + "chatcontext:" + chat + "\"").append(CRLF);
+                    writer.append("Content-Type: text/plain; charset=" + charset).append(CRLF);
+                    writer.append(CRLF).append(param).append(CRLF).flush();
+
+                    // Send binary file.
+                    writer.append("--" + boundary).append(CRLF);
+                    writer.append("Content-Disposition: form-data; name=\"binaryFile\"; filename=\"" + binaryFile.getName() + "\"").append(CRLF);
+                    writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(binaryFile.getName())).append(CRLF);
+                    writer.append("Content-Transfer-Encoding: binary").append(CRLF);
+                    writer.append(CRLF).flush();
+                    Files.copy(binaryFile.toPath(), output);
+                    output.flush(); // Important before continuing with writer!
+                    writer.append(CRLF).flush(); // CRLF is important! It indicates end of boundary.
+
+                    // End of multipart/form-data.
+                    writer.append("--" + boundary + "--").append(CRLF).flush();
+                    writer.close();
+                    output.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                // Request is lazily fired whenever you need to obtain information about response.
+                try {
+                    int responseCode = ((HttpURLConnection) connection).getResponseCode();
+                    System.out.println(responseCode); // Should be 200
+                    ((HttpURLConnection) connection).disconnect();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
     public static void pushMessage(String name, String displayName, String message) {
 
@@ -397,18 +471,120 @@ public class showSetupGui extends Application {
                             serverList.addNewTab(name, displayName);
                         }
                         chatTabController chattab = chatTabHashMap.get(name);
-                        TextArea textArea = chattab.chatTextArea;
-                        textArea.appendText(message + "\n");
+//                        TextArea textArea = chattab.chatTextArea;
+//                        textArea.appendText(message + "\n");
+                        chattab.textFlow.getChildren().add(new Text(message + "\n"));
+                        //chattab.scrollPane.setHvalue(chattab.scrollPane.getHmax());
+                        //chattab.scrollPane.setScrollTop(Double.MAX_VALUE);
                     chattab.lastDisplayName = displayName;
                     for (Tab tab: serverList.chatTabPane.getTabs()) {
-                        System.out.println("Tab text: " + tab.getText());
-                        System.out.println(tab.getText().startsWith(displayName));
+                        //System.out.println("Tab text: " + tab.getText());
+                        //System.out.println(tab.getText().startsWith(displayName));
                         if (tab.getText().startsWith(displayName)) {
                             if (!tab.isSelected()) tab.setText(displayName + " " + (chattab.addPendingMessage()));
                         }
                     }
                     }
             });
+    }
+
+    public static void pushImage (String name, String displayName, ImageView image) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                serverListController serverList = (serverListController) outOfMenuLoader.getController();
+
+                if (!chatTabHashMap.containsKey(name)) {
+                    serverList.addNewTab(name, displayName);
+                }
+                chatTabController chattab = chatTabHashMap.get(name);
+//                        TextArea textArea = chattab.chatTextArea;
+//                        textArea.appendText(message + "\n");
+                chattab.textFlow.getChildren().add(image);
+                chattab.textFlow.getChildren().add(new Text("\n"));
+                //chattab.scrollPane.setHvalue(chattab.scrollPane.getHmax());
+                //chattab.scrollPane.setScrollTop(Double.MAX_VALUE);
+                chattab.lastDisplayName = displayName;
+                for (Tab tab: serverList.chatTabPane.getTabs()) {
+                    //System.out.println("Tab text: " + tab.getText());
+                    //System.out.println(tab.getText().startsWith(displayName));
+                    if (tab.getText().startsWith(displayName)) {
+                        if (!tab.isSelected()) tab.setText(displayName + " " + (chattab.addPendingMessage()));
+                    }
+                }
+            }
+        });
+    }
+
+    public static void pushNode(String name, String displayName, Node node) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                serverListController serverList = (serverListController) outOfMenuLoader.getController();
+
+                if (!chatTabHashMap.containsKey(name)) {
+                    serverList.addNewTab(name, displayName);
+                }
+                chatTabController chattab = chatTabHashMap.get(name);
+//                        TextArea textArea = chattab.chatTextArea;
+//                        textArea.appendText(message + "\n");
+                chattab.textFlow.getChildren().add(node);
+                chattab.textFlow.getChildren().add(new Text("\n"));
+                //chattab.scrollPane.setHvalue(chattab.scrollPane.getHmax());
+                //chattab.scrollPane.setScrollTop(Double.MAX_VALUE);
+                chattab.lastDisplayName = displayName;
+                for (Tab tab: serverList.chatTabPane.getTabs()) {
+                    //System.out.println("Tab text: " + tab.getText());
+                    //System.out.println(tab.getText().startsWith(displayName));
+                    if (tab.getText().startsWith(displayName)) {
+                        if (!tab.isSelected()) tab.setText(displayName + " " + (chattab.addPendingMessage()));
+                    }
+                }
+            }
+        });
+    }
+
+    public static void pushLink(String name, String displayName, String url) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                serverListController serverList = (serverListController) outOfMenuLoader.getController();
+
+                if (!chatTabHashMap.containsKey(name)) {
+                    serverList.addNewTab(name, displayName);
+                }
+                chatTabController chattab = chatTabHashMap.get(name);
+//                        TextArea textArea = chattab.chatTextArea;
+//                        textArea.appendText(message + "\n");
+//                chattab.textFlow.getChildren().add(image);
+//                chattab.textFlow.getChildren().add(new Text("\n"));
+                Hyperlink hyperlink = new Hyperlink(url);
+                chattab.textFlow.getChildren().add(new Text("\n"));
+                hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        try {
+                            Desktop.getDesktop().browse(new URI(url));
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                chattab.textFlow.getChildren().add(hyperlink );
+
+                //chattab.scrollPane.setHvalue(chattab.scrollPane.getHmax());
+                //chattab.scrollPane.setScrollTop(Double.MAX_VALUE);
+                chattab.lastDisplayName = displayName;
+                for (Tab tab: serverList.chatTabPane.getTabs()) {
+                    //System.out.println("Tab text: " + tab.getText());
+                    //System.out.println(tab.getText().startsWith(displayName));
+                    if (tab.getText().startsWith(displayName)) {
+                        if (!tab.isSelected()) tab.setText(displayName + " " + (chattab.addPendingMessage()));
+                    }
+                }
+            }
+        });
     }
 
     public static void removeChatTab(String name) {
@@ -426,6 +602,7 @@ public class showSetupGui extends Application {
             public void run() {
                 lobbyListHashMap = new HashMap<String, String>();
                 lobbyListController controller = lobbyListLoader.getController();
+
                 //Remove all of the lobbys items
                 controller.listView.getItems().removeIf(new Predicate() {
                     @Override
@@ -433,8 +610,9 @@ public class showSetupGui extends Application {
                         return true;
                     }
                 });
+
                 for (Object object: lobbys) {
-                    System.out.println(object.toString());
+                    //System.out.println(object.toString());
                     JSONObject jsonObject = new JSONObject((String.valueOf(object)));
                     String name = jsonObject.getString("name");
                     String displayname = jsonObject.getString("displayname");
@@ -446,6 +624,35 @@ public class showSetupGui extends Application {
                     controller.listView.getItems().add(displayname + " " + players + " " + gamemode);
                 }
                 controller.listView.getItems().sort(new Comparator() {
+                    @Override
+                    public int compare(Object o1, Object o2) {
+                        return String.valueOf(o1).compareTo(String.valueOf(o2));
+                    }
+                });
+
+            }
+        });
+    }
+
+    public static void setOfflineUserList(JSONArray list) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+
+                offlineUserActionController controller = offlineUserActionLoader.getController();
+
+                //Remove all of the lobbys items
+                controller.userListView.getItems().removeIf(new Predicate() {
+                    @Override
+                    public boolean test(Object o) {
+                        return true;
+                    }
+                });
+
+                for (Object object: list) {
+                    controller.userListView.getItems().add(object);
+                }
+                controller.userListView.getItems().sort(new Comparator() {
                     @Override
                     public int compare(Object o1, Object o2) {
                         return String.valueOf(o1).compareTo(String.valueOf(o2));
@@ -508,6 +715,15 @@ public class showSetupGui extends Application {
                 .endObject();
         showSetupGui.client.sendMessage(stringWriter.toString());
     }
+
+    public static void requestOfflineUserList() {
+        StringWriter stringWriter = new StringWriter();
+        new JSONWriter(stringWriter).object()
+                .key("argument").value("offlineuserlist")
+                .endObject();
+        showSetupGui.client.sendMessage(stringWriter.toString());
+    }
+
     //Wipe gui elements (This is used for ex if you are kicked and rejoin)
     public static void clearAllGuiElements() {
         chatTabHashMap = new HashMap<>();
@@ -533,6 +749,19 @@ public class showSetupGui extends Application {
         showSetupGui.mapWidth = mapWidth;
         showSetupGui.mapHeight = mapHeight;
 
+//        serverListController serverList = (serverListController) outOfMenuLoader.getController();
+//        serverList.draw();
+
 
     }
+
+
+    public static void updateUserInfo(String name, String email, String rank) {
+        offlineUserActionController controller = (offlineUserActionController) offlineUserActionLoader.getController();
+        System.out.println("Name: " + name + "Email: " + email + "Rank: " + rank);
+        controller.userInfo.setText("Name: " + name + "\nEmail: " + email + "\nRank: " + rank);
+    }
+
+
+
 }

@@ -8,6 +8,8 @@ import java.io.StringWriter;
 
 /**
  * Created by Evan on 1/4/2017.
+ *
+ * A test client to test the Server
  */
 public class testClient extends Client {
 

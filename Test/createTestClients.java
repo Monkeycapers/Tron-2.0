@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 /**
  * Created by Evan on 1/4/2017.
+ *
+ * Makes batches of test Clients
  */
 public class createTestClients {
 

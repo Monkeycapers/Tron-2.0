@@ -9,6 +9,12 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 12/28/2016.
+ *
+ * Joins an existing lobby
+ *
+ * Arguments: String name
+ *
+ * Does not return
  */
 public class JoinLobbyCommand extends Command {
 

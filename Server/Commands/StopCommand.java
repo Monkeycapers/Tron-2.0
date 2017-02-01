@@ -28,10 +28,6 @@ public class StopCommand extends Command {
     @Override
     public String docommand(ClientWorker clientWorker, GameServer gameServer, JSONObject input, User user) {
 
-        //Fail safe: stop execution if rank is not what is expected
-        assert Authenticate.checkRank(user.getRank(), minrank);
-        //
-
         System.out.println("Exiting");
         System.exit(1);
 

@@ -9,6 +9,12 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 12/28/2016.
+ *
+ * Calls the lobby.onMessage of the user's current lobby
+ *
+ * Argument: String message
+ *
+ * Does not return
  */
 public class LobbyMessageCommand extends Command {
 

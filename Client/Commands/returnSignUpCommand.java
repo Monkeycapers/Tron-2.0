@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 12/16/2016.
+ *
+ * Handle signup errors, or setup main gui and jump to it
  */
 public class returnSignUpCommand extends Command {
 

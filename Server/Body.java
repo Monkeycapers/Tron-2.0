@@ -5,6 +5,10 @@ import javafx.scene.paint.Color;
 
 /**
  * Created by Evan on 12/10/2016.
+ *
+ * Class for a piece of the snake, a body piece.
+ *
+ * Contains a x and y coord, and it's Color.
  */
 public class Body {
 

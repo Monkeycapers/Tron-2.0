@@ -9,6 +9,12 @@ import java.io.StringWriter;
 
 /**
  * Created by Evan on 12/16/2016.
+ *
+ * Checks if the user exists, offline or online.
+ *
+ * Arguments: String name
+ *
+ * Returns: boolean result
  */
 public class UserExistsCommand extends Command {
 

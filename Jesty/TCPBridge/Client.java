@@ -11,6 +11,8 @@ import java.net.Socket;
  *
  * A client class to connect with a Server.
  * Extend it to use it in your project
+ *
+ *
  */
 public abstract class Client implements Runnable {
 

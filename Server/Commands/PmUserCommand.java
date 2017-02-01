@@ -13,7 +13,11 @@ import java.io.StringWriter;
 /**
  * Created by Evan on 12/22/2016.
  *
- * Creates a private chat context with a user
+ * Creates a private chat context with a user specified
+ *
+ * Arguments: String user
+ *
+ * Does not return
  */
 public class PmUserCommand extends Command {
 
@@ -28,7 +32,7 @@ public class PmUserCommand extends Command {
         User targetUser = gameServer.getUserByName(input.getString("user"));
         if (targetUser != null && targetUser != user) {
             PmChat context = new PmChat(user, targetUser);
-            context.sendMessage(gameServer, targetUser.chatFormatDisplay() + " is online.",  true);
+            context.sendMessage(targetUser.chatFormatDisplay() + " is online.",  true);
             gameServer.chatContexts.addNewContext(context);
         }
         return "";

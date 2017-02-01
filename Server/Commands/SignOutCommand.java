@@ -8,6 +8,12 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 1/2/2017.
+ *
+ * Since a kick is equivalent to signing out, just kick the user from the server
+ *
+ * Arguments: NONE
+ *
+ * Does not return
  */
 public class SignOutCommand extends Command {
 

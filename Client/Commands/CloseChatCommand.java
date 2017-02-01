@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 12/27/2016.
+ * Handles the closing of a chat tab
  */
 public class CloseChatCommand extends Command {
 

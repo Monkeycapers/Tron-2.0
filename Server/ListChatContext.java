@@ -8,6 +8,8 @@ import java.util.List;
 
 /**
  * Created by Evan on 12/28/2016.
+ *
+ * Extends ChatContext, stores the users in a list
  */
 public class ListChatContext extends ChatContext {
 
@@ -21,7 +23,7 @@ public class ListChatContext extends ChatContext {
     }
 
     @Override
-    public void sendMessage(GameServer gameServer, String message) {
+    public void sendMessage(String message) {
 
         StringWriter stringWriter = new StringWriter();
 
@@ -42,9 +44,14 @@ public class ListChatContext extends ChatContext {
     public boolean removeUser (User user) {
         if (users.contains(user)) {
             users.remove(user);
+            //If the users list is empty, the chat context should be destroyed
             return users.isEmpty();
         }
         return false;
     }
 
+    @Override
+    public List<User> getUsers() {
+        return users;
+    }
 }

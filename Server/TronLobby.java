@@ -14,6 +14,8 @@ import java.util.Stack;
 
 /**
  * Created by Evan on 12/27/2016.
+ *
+ * The lobby for the tron game. The game will start once two or more people are in the lobby.
  */
 public class TronLobby extends Lobby {
 
@@ -41,98 +43,47 @@ public class TronLobby extends Lobby {
             , Color.INDIGO, Color.IVORY, Color.MIDNIGHTBLUE, Color.LIMEGREEN, Color.VIOLET
     };
 
+    //The order of directions as people join the server
     Direction[] directiontable = new Direction[] {
         Direction.DOWN, Direction.UP, Direction.RIGHT, Direction.LEFT
     };
-
-
 
     int usersalive = 0;
 
     public TronLobby(User creator, String lobbyName, int maxPlayers, ChatContext chatContext) {
 
+        //Load all settings
         Settings.load();
-
         mapWidth = Settings.getIntProperty("tronmapwidth");
         mapHeight = Settings.getIntProperty("tronmapheight");
-
         sleepTime = Settings.getIntProperty("tronsleeptime");
+        //
 
+        //Init variables
         this.name = lobbyName;
         this.chatContext = chatContext;
         players = new ArrayList<>();
         TronPlayer creatorplayer = new TronPlayer(creator, directiontable[0], new Point(0, 0), colortable[0]);
         this.creator = creatorplayer;
         players.add(creatorplayer);
+        //Check if the maxPlayers is valid, if not set it automatically to the max supported players
         if (maxPlayers > MAX_SUPPORTED_PLAYERS || maxPlayers <= 1) maxPlayers = MAX_SUPPORTED_PLAYERS;
         this.maxSize = maxPlayers;
-        chatContext.sendMessage(null, "Waiting for 1 more player...");
+        //Wait for one more person to join to start the game
+        chatContext.sendMessage("Waiting for 1 more player...");
         tronState = TronState.WAITING;
     }
 
-
-//    public Point getNewStartingPoint() {
-////        Point point;
-////        //Point Down
-////        if (multi == 0) {
-////            point = new Point(players.size() * 4, 0);
-////        }
-////        //Point Up
-////        else if (multi == 1) {
-////            point = new Point(players.size() * 4, mapHeight);
-////        }
-////        //Point Right
-////        else if (multi == 2) {
-////            point = new Point(0, players.size() * 4);
-////        }
-////        //Point Left
-////        else if (multi == 3) {
-////            point = new Point(mapWidth, players.size() * 4);
-////        }
-////        else {
-////            point = null;
-////        }
-//
-//        Point point;
-//
-//        //determine what to divide by
-//        int divideby;
-//        if (above4) divideby = 4;
-//        else divideby = 2;
-//        //
-//
-//        //Point down
-//        if (multi == 0) {
-//            point = new Point(mapWidth / divideby, 0);
-//        }
-//        //Point up
-//        else if (multi == 1) {
-//            point = new Point(mapWidth / divideby, mapHeight);
-//        }
-//        //Point Right
-//        else if (multi == 2) {
-//            point = new Point(0, mapHeight / divideby);
-//        }
-//        //Point left
-//        else if (multi == 3) {
-//            point = new Point(mapWidth, mapHeight / divideby);
-//        }
-//        //Point ???
-//        else {
-//            point = new Point(mapWidth / divideby, mapHeight / divideby);
-//        }
-//
-//        return point;
-//    }
-
     @Override
     public boolean onClose(User user) {
+        //Remove the user from the lobby
         getChat().removeUser(user);
         TronPlayer player = getPlayerByUser(user);
         if (player == null) return false;
         players.remove(player);
-        if (players.size() == 1) {
-            chatContext.sendMessage(null, "Waiting for 1 more player...");
+        System.out.println("size: " + players.size());
+        if (players.size() <= 1) {
+            chatContext.sendMessage("Waiting for 1 more player...");
             tronState = TronState.WAITING;
         }
         //user.setCurrentLobby(null);
@@ -140,7 +91,7 @@ public class TronLobby extends Lobby {
         if (player == creator && !players.isEmpty()) {
             creator = players.get(0);
         }
-        //Determine if the lobby needs to be dissolved
+        //Determine if the lobby needs to be dissolved (if there is no players, it should be dissolved)
         return players.isEmpty();
     }
 
@@ -150,7 +101,7 @@ public class TronLobby extends Lobby {
         getChat().users.add(user);
         TronPlayer player = new TronPlayer(user, directiontable[0], new Point(0, 0), colortable[players.size()]);
         players.add(player);
-
+        //There must have been 1 person waiting for this user to have joined, start the game
         if (tronState == TronState.WAITING) {
             countdown = DEFAULT_COUNTDOWN_TIME;
             tronState = TronState.BEGIN_COUNTDOWN;
@@ -163,7 +114,9 @@ public class TronLobby extends Lobby {
             //Key input
             String key = input.getString("key");
             TronPlayer tronPlayer = getPlayerByUser(user);
-            if (tronPlayer == null) return;
+            //Make sure the tron player is not null (will throw an expection if it is null)
+            assert tronPlayer == null : "Tron player is null; should not be null";
+            //if (tronPlayer == null) return;
             //Up
             if (key.equals("W") && !(tronPlayer.snake.direction == Direction.DOWN)) {
                 tronPlayer.snake.direction = Direction.UP;
@@ -185,25 +138,28 @@ public class TronLobby extends Lobby {
 
     @Override
     public void pause() {
-
+        //Not implemented
     }
 
     @Override
     public void run() {
         while (isRunning) {
+            //Wait for one more person to join
             if (tronState == TronState.WAITING) {
                 try {Thread.sleep(1000);} catch (Exception e) { }
             }
+            //In the start countdown, continue it until it is 0 and start the game
             else if (tronState == TronState.BEGIN_COUNTDOWN) {
-                chatContext.sendMessage(null, "Time left until game begins: " + countdown);
+                chatContext.sendMessage("Time left until game begins: " + countdown);
                 countdown --;
                 try {Thread.sleep(1000);} catch (Exception e) {}
                 if (countdown <= 0) {
                     tronState = TronState.IN_GAME;
-                    chatContext.sendMessage(null, "The game has begun!");
+                    chatContext.sendMessage("The game has begun!");
                     reset();
                 }
             }
+            //In the game, perform a tick
             else if (tronState == TronState.IN_GAME) {
                 //State changes
                 for (TronPlayer tronPlayer: players) {
@@ -211,46 +167,43 @@ public class TronLobby extends Lobby {
                         tronPlayer.snake.tick1();
                     }
                 }
+                //
+                //Check for deaths
                 for (TronPlayer tronPlayer: players) {
                     if (tronPlayer.isAlive) {
+                        //Check if the player has hit the border of the map
                         if (tronPlayer.snake.head.xCord > mapWidth || tronPlayer.snake.head.xCord < 0 || tronPlayer.snake.head.yCord > mapHeight || tronPlayer.snake.head.yCord < 0) {
-                            chatContext.sendMessage(null, "Ouch! " + tronPlayer.user.getName() + " ran into a wall!");
+                            chatContext.sendMessage("Ouch! " + tronPlayer.user.getName() + " ran into a wall!");
                             tronPlayer.isAlive = false;
                         }
-//                    for (Body body: tronPlayer.snake.body) {
-//                        if (tronPlayer.snake.head.xCord == body.xCord && tronPlayer.snake.head.yCord == body.yCord) {
-//                            tronPlayer.isAlive = false;
-//                        }
-//                    }
                         //Other and self snakes
                         for (TronPlayer otherTronPlayer: players) {
                             if (otherTronPlayer.isVisible) {
                                 //If the heads hit and it isn't the same tron
                                 if (tronPlayer.snake.head.xCord == otherTronPlayer.snake.head.xCord && tronPlayer.snake.head.yCord == otherTronPlayer.snake.head.yCord && otherTronPlayer.isAlive && tronPlayer != otherTronPlayer) {
                                     //Two heads run into each other
-                                    chatContext.sendMessage(null, "Wow! " + tronPlayer.user.chatFormatDisplay() + " and " + otherTronPlayer.user.chatFormatDisplay() + " Killed each other!");
+                                    chatContext.sendMessage("Wow! " + tronPlayer.user.chatFormatDisplay() + " and " + otherTronPlayer.user.chatFormatDisplay() + " Killed each other!");
                                     tronPlayer.isAlive = false;
                                     otherTronPlayer.isAlive = false;
                                 }
                                 else {
                                     for (Body body:otherTronPlayer.snake.body) {
+                                        //Check if this snake ran into another snake's body
                                         if (tronPlayer.snake.head.xCord == body.xCord && tronPlayer.snake.head.yCord == body.yCord) {
-                                            chatContext.sendMessage(null, otherTronPlayer.user.getName() + " Killed " + tronPlayer.user.getName() + "!");
+                                            chatContext.sendMessage(otherTronPlayer.user.getName() + " Killed " + tronPlayer.user.getName() + "!");
                                             tronPlayer.isAlive = false;
                                         }
                                     }
                                 }
                             }
                         }
+                        //Do the second half of state changes
                         tronPlayer.snake.tick2();
                     }
                 }
 
+                //Update the # of users still alive
                 usersalive = getUsersStillAlive();
-
-                //System.out.println("users alive " + usersalive + ", " + "users: " + players.size() + ";");
-
-
 
                 //Render
                 //Gen a list of all snake's points
@@ -259,14 +212,17 @@ public class TronLobby extends Lobby {
                 for (TronPlayer tronPlayer: players) {
                     if (tronPlayer.isVisible) {
 
+                        //Add all of the body parts to the list
                         for (Body b : tronPlayer.snake.body) {
                             renderList.add((int) (tronPlayer.snake.color.getRed() * 255) + "," + (int) (tronPlayer.snake.color.getGreen() * 255) + "," + (int) (tronPlayer.snake.color.getBlue() * 255) + "," + (b.xCord + 1) + "," + (b.yCord + 1));
                         }
 
+                        //add the head last so that the body does not overlap with the head
                         renderList.add((255) + "," +  (255) + "," + (255) + "," + (tronPlayer.snake.head.xCord + 1) + "," + (tronPlayer.snake.head.yCord + 1));
 
                     }
                 }
+                //Send the render list to all clients
                 StringWriter stringWriter = new StringWriter();
                 new JSONWriter(stringWriter).object()
                         .key("argument").value("lobbydraw")
@@ -281,18 +237,17 @@ public class TronLobby extends Lobby {
 
                 //
 
+                //Check if there is less than 2 people alive, get the winner and start the countdown again
                 if (usersalive < 2) {
                     countdown = DEFAULT_COUNTDOWN_TIME;
                     tronState = TronState.BEGIN_COUNTDOWN;
                     TronPlayer winner = getWinner();
                     if (winner == null) {
-                        chatContext.sendMessage(null, "Game has finished. Nobody won this game!" + getScoreBoard());
+                        chatContext.sendMessage("Game has finished. Nobody won this game!" + getScoreBoard());
                     }
                     else {
-                        chatContext.sendMessage(null, "Game has finished. Winner: " + winner.user.chatFormatDisplay() + getScoreBoard());
+                        chatContext.sendMessage("Game has finished. Winner: " + winner.user.chatFormatDisplay() + getScoreBoard());
                     }
-
-                    //reset();
                 }
 
                 //Sleep (equivalent of a timer)
@@ -301,6 +256,7 @@ public class TronLobby extends Lobby {
         }
     }
 
+    //Generates a score board
     public String getScoreBoard() {
         String toSend = "";
         for (TronPlayer tronPlayer: players) {
@@ -319,6 +275,8 @@ public class TronLobby extends Lobby {
                 returnPlayer = tronPlayer;
             }
         }
+
+        //Sort the players by their score, using a comparator
         players.sort(new Comparator<TronPlayer>() {
             @Override
             public int compare(TronPlayer o1, TronPlayer o2) {
@@ -336,6 +294,7 @@ public class TronLobby extends Lobby {
         return returnPlayer;
     }
 
+    //Get the TronPlayer coresponding with the user
     public TronPlayer getPlayerByUser(User u) {
         for (TronPlayer tronPlayer: players) {
             if (tronPlayer.user == u) {
@@ -345,6 +304,7 @@ public class TronLobby extends Lobby {
         return null;
     }
 
+    //Get the amount of users that are still alive
     public int getUsersStillAlive() {
         int ualive = 0;
         for (TronPlayer tronPlayer: players) {
@@ -353,12 +313,40 @@ public class TronLobby extends Lobby {
         return ualive;
     }
 
+    //Reset all of the snakes, determine where they should start, their colors and direction
     public void reset() {
 
         mapWidth = Settings.getIntProperty("tronmapwidth");
         mapHeight = Settings.getIntProperty("tronmapheight");
 
         sleepTime = Settings.getIntProperty("tronsleeptime");
+
+        /*
+        A Plus is a border
+
+        A number is a player from the player list (sorted by score).
+
+        As you can see, it goes (from direction):
+        Down, Up, Right, Left
+
+        And it continues this pattern, filling in the gaps until it reaches 12.
+
+        ++++++++++++++++++++++++++++++++++++
+        +       5          1        9      +
+        +                                  +
+        +7                                8+
+        +                                  +
+        +3                                4+
+        +                                  +
+        +                                  +
+        +11                              12+
+        +                                  +
+        +      6           2         10    +
+        ++++++++++++++++++++++++++++++++++++
+
+         */
+
+
 
         int multi = 0;
         for (int i = 0; i < players.size(); i ++) {
@@ -428,26 +416,27 @@ public class TronLobby extends Lobby {
             }
             players.set(i, player);
         }
-
-//        for (TronPlayer player: players) {
-//            System.out.println("User " + player.user.chatFormatDisplay() + ", Is alive: " + player.isAlive + "Is visible " + player.isVisible + " Direction " + player.snake.direction + ", " + player.snake.direction);
-//        }
     }
 
+
+    //Check if the players size is less than the maxSize and check if it is not a private lobby
     @Override
     public boolean canConnect(User user) {
         return (players.size() <= maxSize && !isPrivate);
     }
 
+    //return the players size
     @Override
     public int getPlayerCount() {
         return players.size();
     }
 
+    //Returns the chat context of this lobby
     public ListChatContext getChat() {
         return (ListChatContext)(chatContext);
     }
 
+    //Returns a list of users
     @Override
     public List<User> getUsers() {
         List<User> userlist = new ArrayList<>();

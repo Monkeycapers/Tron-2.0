@@ -18,7 +18,7 @@ import java.io.StringWriter;
  * Arguments: String User, String Pass OR byte[] SecureToken
  * Returns Boolean success
  *
- * If TRUE, byte[] securetoken
+ * If TRUE, returns the user list, and the user's displayname
  * If FALSE, int reason
  * Reason 0 --> Wrong pass or username (or invalid token)
  * Reason 1 --> Cannot signin (server error)
@@ -55,7 +55,8 @@ public class SignInCommand extends Command {
                         .key("highrank").value(Authenticate.checkRank(user.getRank(), Rank.Op))
                         .endObject();
                 //Add to general chat
-                ((GeneralChat)(gameServer.chatContexts.getContext("general"))).userJoinedMessage(gameServer, user);
+                //((GeneralChat)(gameServer.chatContexts.getContext("general"))).userJoinedMessage(gameServer, user);
+                gameServer.chatContexts.userAction("joined", user);
                 //Tell the clients to add the user to their user list
                 StringWriter writer2 = new StringWriter();
                 new JSONWriter(writer2).object()

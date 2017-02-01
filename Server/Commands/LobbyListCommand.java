@@ -15,6 +15,15 @@ import java.util.List;
 
 /**
  * Created by Evan on 1/1/2017.
+ *
+ * Generates a list of the lobbys, their names and displaynames, and the lobbys current player count.
+ *
+ * Arguments: NON
+ *
+ * Returns List<JSONObject> lobbylist
+ *
+ * Each JSONObject: String name, String displayname, String players, boolean isprivate, String gamemode
+ *
  */
 public class LobbyListCommand extends Command {
 

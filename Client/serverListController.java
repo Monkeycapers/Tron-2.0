@@ -35,7 +35,11 @@ import java.util.ResourceBundle;
 
 /**
  * Created by S199753733 on 12/19/2016.
+ *
+ *Javafx controller class for the main gui, contains the chat tab(s), the player list, the menu and the game Canvas.
  */
+
+//todo: Refactor this, terrible name
 public class serverListController implements Initializable {
 
     @FXML
@@ -59,6 +63,15 @@ public class serverListController implements Initializable {
     @FXML
     MenuItem promoteMenuItem;
 
+    @FXML
+    MenuItem leaveLobbyMenuItem;
+
+    @FXML
+    MenuItem snakeLobbyItem;
+
+    @FXML
+    MenuItem offlineUserAction;
+
     //User List view
 
     @FXML
@@ -75,6 +88,48 @@ public class serverListController implements Initializable {
     HashMap<String, Tab> tabNameHashMap;
 
 
+    //Draw to canvas
+    public void draw() {
+        showSetupGui.updateCanvas();
+
+        int height = Integer.valueOf(Settings.getProperty("wallheight"));
+        int width = Integer.valueOf(Settings.getProperty("wallwidth"));
+
+        GraphicsContext gc = showSetupGui.canvas.getGraphicsContext2D();
+
+        gc.setFill(Color.BLACK);
+
+        gc.clearRect(0, 0, showSetupGui.mapWidth * width, showSetupGui.mapHeight * height);
+        gc.fillRect(0, 0, showSetupGui.mapWidth * width, showSetupGui.mapHeight * height);
+
+
+        for (Object object: showSetupGui.render) {
+            String renderstring = (String)(object);
+            String[] ints = renderstring.split(",");
+            //double d = 100.0;
+            //System.out.println((int)d);
+            Color color = Color.rgb(Integer.valueOf(ints[0]), Integer.valueOf(ints[1]),  Integer.valueOf(ints[2]));
+            gc.setFill(color);
+            int x = Integer.valueOf(ints[3]);
+            int y = Integer.valueOf(ints[4]);
+            gc.fillRect(width * x, height * y, width, height);
+
+            //System.out.println("RenderString: " + renderstring);
+        }
+        gc.setFill(Color.WHITE);
+        //Top wall
+        gc.fillRect(0, 0, (showSetupGui.mapWidth * width), height);
+        //Left wall
+        gc.fillRect(0, 0, width, (showSetupGui.mapHeight * height));
+        //Right wall
+        gc.fillRect((showSetupGui.mapWidth * width), 0, width, (showSetupGui.mapHeight * height));
+        //Bottom wall
+        gc.fillRect(0, (showSetupGui.mapHeight * height), (showSetupGui.mapWidth * width), height);
+
+        gc.save();
+    }
+
+
 
 
     @Override // This method is called by the FXMLLoader when initialization is complete
@@ -85,53 +140,25 @@ public class serverListController implements Initializable {
         canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
         new AnimationTimer() {
             public void handle(long currentNanoTime) {
-
-                showSetupGui.updateCanvas();
-
-                int height = Integer.valueOf(Settings.getProperty("wallheight"));
-                int width = Integer.valueOf(Settings.getProperty("wallwidth"));
-
-                GraphicsContext gc = showSetupGui.canvas.getGraphicsContext2D();
-
-                gc.setFill(Color.BLACK);
-
-                gc.clearRect(0, 0, showSetupGui.mapWidth * width, showSetupGui.mapHeight * height);
-                gc.fillRect(0, 0, showSetupGui.mapWidth * width, showSetupGui.mapHeight * height);
-
-
-                for (Object object: showSetupGui.render) {
-                    String renderstring = (String)(object);
-                    String[] ints = renderstring.split(",");
-                    //double d = 100.0;
-                    //System.out.println((int)d);
-                    Color color = Color.rgb(Integer.valueOf(ints[0]), Integer.valueOf(ints[1]),  Integer.valueOf(ints[2]));
-                    gc.setFill(color);
-                    int x = Integer.valueOf(ints[3]);
-                    int y = Integer.valueOf(ints[4]);
-                    gc.fillRect(width * x, height * y, width, height);
-
-                    //System.out.println("RenderString: " + renderstring);
-                }
-                gc.setFill(Color.WHITE);
-                //Top wall
-                gc.fillRect(0, 0, (showSetupGui.mapWidth * width), height);
-                //Left wall
-                gc.fillRect(0, 0, width, (showSetupGui.mapHeight * height));
-                //Right wall
-                gc.fillRect((showSetupGui.mapWidth * width), 0, width, (showSetupGui.mapHeight * height));
-                //Bottom wall
-                gc.fillRect(0, (showSetupGui.mapHeight * height), (showSetupGui.mapWidth * width), height);
-
-                gc.save();
+                draw();
             }
         }.start();
-        //
+
         tabControllerHashMap = new HashMap<>();
 //        chatTabPane.getTabs().add(getNewTab("Wow!", "Wow"));
 //        chatTabPane.getTabs().add(getNewTab("much", "lol"));
 //        chatTabPane.getTabs().add(getNewTab("panes", "bup"));
 
         //userListView.getItems().addAll("User1", "User2", "User3");
+
+
+        offlineUserAction.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                showSetupGui.requestOfflineUserList();
+                showSetupGui.showAnotherLayout(showSetupGui.offlineUserActionLayout);
+            }
+        });
 
         lobbyListMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -247,6 +274,29 @@ public class serverListController implements Initializable {
             }
         });
 
+        leaveLobbyMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                StringWriter stringWriter = new StringWriter();
+                new JSONWriter(stringWriter).object()
+                        .key("argument").value("leavelobby")
+                        .endObject();
+                showSetupGui.client.sendMessage(stringWriter.toString());
+            }
+        });
+
+        snakeLobbyItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                StringWriter stringWriter = new StringWriter();
+                new JSONWriter(stringWriter).object()
+                        .key("argument").value("createlobby")
+                        .key("type").value("snake")
+                        .endObject();
+                showSetupGui.client.sendMessage(stringWriter.toString());
+            }
+        });
+
 
 
 
@@ -313,7 +363,7 @@ public class serverListController implements Initializable {
                     @Override
                     public void changed(ObservableValue<? extends Tab> ov, Tab t, Tab t1) {
                         try {
-                            System.out.println("Tab Selection changed");
+                            //System.out.println("Tab Selection changed");
                             chatTabController controller = tabControllerHashMap.get(t1);
                             if (controller != null) {
                                 controller.pendingMessageCount = 0;
@@ -329,6 +379,8 @@ public class serverListController implements Initializable {
         );
 
         tabNameHashMap = new HashMap<>();
+
+        userListView.getItems().add("Offline User");
 
 //        generalTextField.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
 //

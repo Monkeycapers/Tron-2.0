@@ -7,6 +7,8 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 12/16/2016.
+ *
+ * Check if a user exists on the server, used by the Check button on the signin client
  */
 public class loginGuiCheckUserExistsCommand extends Client.Commands.Command {
 

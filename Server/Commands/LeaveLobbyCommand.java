@@ -9,6 +9,12 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 1/2/2017.
+ *
+ * Leaves a lobby and it's chatContext
+ *
+ * Arguments: NON
+ *
+ * Does not return
  */
 public class LeaveLobbyCommand extends Command {
 

@@ -43,32 +43,46 @@ public class Commands {
         commands.add(new LobbyListCommand());
         commands.add(new LeaveLobbyCommand());
         commands.add(new SignOutCommand());
+        commands.add(new OfflineUserListCommand());
     }
 
+    /*Perform the command. Returns:
+    *"noreturnsuccsess" if the command does not return and was successful
+    *"errornocommand" if there was no command found
+    *"errornotprivilidged" if the Users rank was lower than the commands minRank
+    * OR
+    * A JSON String to send to the client
+    */
     public String orchestrateCommand(ClientWorker clientWorker, JSONObject jsonObject) {
         StringWriter stringWriter = new StringWriter();
         User user =(User)clientWorker.clientData;
+        //Get the command from the argument input
         Command command = getCommand(jsonObject.getString("argument"));
+        //If the command was found
         if (command != null) {
+            //Check if the User's rank is at least the commands minrank
             if (!Authenticate.checkRank(user.getRank(), command.minrank)) {
                 new JSONWriter(stringWriter).object()
                         .key("argument").value("errornotprivilidged").endObject();
                 return stringWriter.toString();
             }
+            //If the command returns, return the result of the command
             if (command.doreturn) {
                 return command.docommand(clientWorker, gameServer, jsonObject, user);
             }
+            //Else, return the success String
             else {
                 command.docommand(clientWorker, gameServer, jsonObject, user);
                 return "noreturnsuccsess";
             }
         }
-
+        //The command was not found
         new JSONWriter(stringWriter).object()
                 .key("argument").value("errornocommand").endObject();
         return stringWriter.toString();
     }
 
+    //Find the command from the command List
     public Command getCommand(String argument) {
         for (Command c: commands) {
             if (c.name.equals(argument)) {

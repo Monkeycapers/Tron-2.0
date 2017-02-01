@@ -16,6 +16,8 @@ import java.util.ResourceBundle;
 
 /**
  * Created by Evan on 12/15/2016.
+ *
+ * Javafx controller class for the sign in gui, goal is to sign in or sign up to the server.
  */
 public class signinController implements Initializable {
 
@@ -54,14 +56,10 @@ public class signinController implements Initializable {
 
     boolean isSignUp = false;
 
-    @Override // This method is called by the FXMLLoader when initialization is complete
+    @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
-        assert checkButton != null : "fx:id=\"myButton\" was not injected...";
-        assert checkUserExistsLabel != null : "fx:id=\"myButton\" was not injected...";
-        // initialize your logic here: all @FXML variables will have been injected
 
         checkButton.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Check button pressed");
@@ -75,7 +73,6 @@ public class signinController implements Initializable {
         });
 
         loginButton.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Login button pressed");
@@ -88,6 +85,7 @@ public class signinController implements Initializable {
                             .key("email").value(emailField.getText())
                             .endObject();
                     showSetupGui.client.sendMessage(stringWriter.toString());
+                    flush();
                 }
                 else {
                     StringWriter stringWriter = new StringWriter();
@@ -97,12 +95,12 @@ public class signinController implements Initializable {
                             .key("password").value(passwordField.getText())
                             .endObject();
                     showSetupGui.client.sendMessage(stringWriter.toString());
+                    flush();
                 }
             }
         });
 
         signUpButton.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Sign Up button pressed");
@@ -157,6 +155,15 @@ public class signinController implements Initializable {
                 signInError.setText(message);
             }
         });
+    }
+
+    //Clears all text boxes for user privacy
+    public void flush() {
+        usernameField.clear();
+        passwordField.clear();
+        emailField.clear();
+        signInError.setText("");
+        checkUserExistsLabel.setText("");
     }
 
 }

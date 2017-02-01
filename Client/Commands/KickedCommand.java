@@ -8,6 +8,8 @@ import javax.swing.*;
 
 /**
  * Created by Evan on 1/2/2017.
+ *
+ * Handles being kicked, showing a message dialog and showing the loginlayout
  */
 public class KickedCommand extends Command {
 

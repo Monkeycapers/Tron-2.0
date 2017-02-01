@@ -6,6 +6,8 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 12/19/2016.
+ *
+ * Handles chat messages from the server and sends it to showSetupGui
  */
 public class ChatMessageCommand extends Command {
 

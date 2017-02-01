@@ -10,6 +10,8 @@ import java.util.Stack;
 
 /**
  * Created by Evan on 12/10/2016.
+ *
+ * A Snake class that can be used for Snake and Tron gamemodes
  */
 public class Snake {
 
@@ -105,6 +107,7 @@ public class Snake {
     }
 
     public void reset() {
+        //Resets the snake to its original direction and position.
         direction = firstdirection;
         head.xCord = firstpoint.x;
         head.yCord = firstpoint.y;

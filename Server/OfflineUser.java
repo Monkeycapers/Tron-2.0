@@ -6,6 +6,8 @@ import java.util.HashMap;
 
 /**
  * Created by Evan on 12/15/2016.
+ *
+ * An unsecure, offline user that imitates a User. Used for promoting and banning offline users
  */
 public class OfflineUser {
 
@@ -25,16 +27,6 @@ public class OfflineUser {
             this.rank = Rank.valueOf((String)result.get("rank"));
             return authenticationstatus.Success;
         }
-        //else {
-//            int reason = (int)result.get("reason");
-//            if (reason == 0) {
-//                //return authenticationstatus.NoUserOrPassword;
-//            }
-//            else if (reason == 2) {
-//                //banreason = (String)result.get("banreason");
-//                //return authenticationstatus.Banned;
-//            }
-        //}
         return authenticationstatus.Failure;
     }
 

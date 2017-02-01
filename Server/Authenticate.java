@@ -6,30 +6,40 @@ import org.json.JSONWriter;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by Evan on 12/6/2016.
+ *
+ * Static file IO class used to perform actions on the users.json file.
+ * Also provides static methods for checking and comparing ranks.
  */
 public class Authenticate {
 
     private static File usersfile;
 
-    private static Rank[] rankOrder = new Rank[] {Rank.Banned, Rank.Guest, Rank.User, Rank.Op, Rank.Admin};
+    private static Rank[] rankOrder = new Rank[] {Rank.Banned, Rank.Guest, Rank.User, Rank.Op, Rank.Admin, Rank.Super};
 
-//    public static void setUp() {
-//
-//    }
-
+    //Sets the usersfile to the file, if the file has not been created, create it and add a super user
     public static void setFile(File file) {
         usersfile = file;
         try {
             if (file.createNewFile()) {
                 //Create the json object
+
+                JSONArray array = new JSONArray();
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", "root");
+                jsonObject.put("rank", "Super");
+                jsonObject.put("email", "");
+                jsonObject.put("pass", BCrypt.hashpw("root", BCrypt.gensalt()));
+                array.put(jsonObject);
+
                 StringWriter stringWriter = new StringWriter();
                 new JSONWriter(stringWriter).object()
-                        .key("users").value(new JSONArray())
+                        .key("users").value(array)
                         .endObject();
 
                 PrintWriter out = new PrintWriter(new FileWriter(usersfile));
@@ -43,6 +53,7 @@ public class Authenticate {
         }
     }
 
+    //Authenticate using a name and a pass
     public static HashMap<String, Object> authenticate(String name, String pass, boolean unsecure) {
         HashMap<String, Object> result = new HashMap<>();
         try {
@@ -78,10 +89,6 @@ public class Authenticate {
                 }
             }
             result.put("reason", 0);
-//            System.out.println("printing users");
-//            for (Object o: users) {
-//                System.out.println(o);
-//            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -90,9 +97,9 @@ public class Authenticate {
         result.put("result", false);
         return result;
     }
-
-    public static String getUserList() {
-        String toReturn = "";
+    //Creates a List of all users in the users file
+    public static List<String> getUserList() {
+        //String toReturn = "";
         try {
             String in = "";
             String total = "";
@@ -101,17 +108,24 @@ public class Authenticate {
             bufferedReader.close();
             JSONObject jsonObject = new JSONObject(total);
             List<Object> users = jsonObject.getJSONArray("users").toList();
+//            for (Object u: users) {
+//                JSONObject user = new JSONObject((HashMap)u);
+//                toReturn += "[" +  user.getString("rank") + "] " + user.getString("name") + "\n";
+//            }
+            List<String> list = new ArrayList<>();
             for (Object u: users) {
                 JSONObject user = new JSONObject((HashMap)u);
-                toReturn += "[" +  user.getString("rank") + "] " + user.getString("name") + "\n";
+                //list.add(user.getString("name"));
+                list.add("[" +  user.getString("rank") + "] " + user.getString("name"));
             }
+            return list;
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        return toReturn;
+        return null;
     }
-
+    //Creates a user entry
     public static HashMap<String, Object> signUp(String name, String pass, String email, String rank) {
         HashMap<String, Object> result = new HashMap<>();
 
@@ -170,7 +184,7 @@ public class Authenticate {
         result.put("result", false);
         return result;
     }
-
+    //Update a user, if there are any changes ie. Rank change
     public static authenticationstatus update(User user) {
         try {
             String in = "";
@@ -224,6 +238,7 @@ public class Authenticate {
         }
         return authenticationstatus.Failure;
     }
+    //Update a offline user
     public static authenticationstatus update(OfflineUser user) {
         try {
             String in = "";
@@ -281,6 +296,10 @@ public class Authenticate {
         return authenticationstatus.Failure;
     }
 
+
+
+    //TRUE if the rank is atleast minRank
+    //FALSE if the rank is < minRank
     public static boolean checkRank (Rank rank, Rank minRank) {
         int i1 = 0, i2 = 0;
         for (int i = 0; i < rankOrder.length; i++) {
@@ -298,6 +317,9 @@ public class Authenticate {
     //0: Rank1 is equal to rank2
     //-1 Rank1 is smaller than rank2
     public static int compareRanks (Rank rank1, Rank rank2) {
+
+        //Get the position of the ranks in the rankOrder array
+
         int i1 = 0, i2 = 0;
         for (int i = 0; i < rankOrder.length; i++) {
             if (rankOrder[i] == (rank1)) {
@@ -307,9 +329,11 @@ public class Authenticate {
                 i2 = i;
             }
         }
-
+        //If rank1 > rank2
         if (i1 > i2) return 1;
+        //If rank1 < rank2
         if (i1 < i2) return -1;
+        //If rank1 == rank2
         return 0;
     }
 

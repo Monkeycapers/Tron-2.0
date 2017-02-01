@@ -11,6 +11,10 @@ import java.util.List;
 
 /**
  * Created by Evan on 1/3/2017.
+ *
+ * A Single player Snake game.
+ *
+ * Access by typing /snake into any chat, or pressing the Snake button under the commands menu on the client
  */
 public class SnakeLobby extends Lobby {
 
@@ -53,7 +57,8 @@ public class SnakeLobby extends Lobby {
 
     @Override
     public void onMessage(User user, JSONObject input) {
-        if (input.getString("type").equals("key") && !doNotAcceptKeyInput){
+        String type = input.getString("type");
+        if (type.equals("key") && !doNotAcceptKeyInput){
             //Key input
             String key = input.getString("key");
             //Up
@@ -109,12 +114,15 @@ public class SnakeLobby extends Lobby {
     @Override
     public void run() {
         while (isRunning) {
+            long tickTime = System.currentTimeMillis();
+//            System.out.println(tick);
+//            System.out.println(utick);
+            //if (tick == utick) {
+                snake.direction = changeToDirection;
 
-            snake.direction = changeToDirection;
+                doNotAcceptKeyInput = false;
 
-            doNotAcceptKeyInput = false;
-
-            boolean doReset = false;
+                boolean doReset = false;
 
                 snake.tick1();
 
@@ -127,56 +135,60 @@ public class SnakeLobby extends Lobby {
                     }
                 }
                 if (!doReset && snake.head.xCord == food.xCord && snake.head.yCord == food.yCord) {
-                    chatContext.sendMessage(null, "Your score: " + snake.body.size());
+                    chatContext.sendMessage("Your score: " + snake.body.size());
                     food = randomFood();
                     doReset = (food == null);
                     if (!doReset) {
                         snake.body.push(food);
                     }
                 }
-            if (doReset) {
-                reset();
-            }
-
-            else {
-                snake.tick2();
-
-                //Render
-                //Gen a list of the snakes points
-
-                List<String> renderList = new ArrayList<>();
-                for (Body b : snake.body) {
-                    renderList.add((int) (b.c.getRed() * 255) + "," + (int) (b.c.getGreen() * 255) + "," + (int) (b.c.getBlue() * 255) + "," + (b.xCord + 1) + "," + (b.yCord + 1));
+                if (doReset) {
+                    reset();
                 }
-                renderList.add((255) + "," +  (255) + "," + (255) + "," + (snake.head.xCord + 1) + "," + (snake.head.yCord + 1));
+                else {
+                    snake.tick2();
 
-                renderList.add((int) (food.c.getRed() * 255) + "," + (int) (food.c.getGreen() * 255) + "," + (int) (food.c.getBlue() * 255) + "," + (food.xCord + 1) + "," + (food.yCord + 1));
+                    //Render
+                    //Gen a list of the snakes points
 
-                StringWriter stringWriter = new StringWriter();
-                new JSONWriter(stringWriter).object()
-                        .key("argument").value("lobbydraw")
-                        .key("name").value(name)
-                        .key("mapwidth").value(mapWidth)
-                        .key("mapheight").value(mapHeight)
-                        .key("render").value(renderList)
-                        .endObject();
-                user.clientWorker.sendMessage(stringWriter.toString());
+                    List<String> renderList = new ArrayList<>();
+                    for (Body b : snake.body) {
+                        renderList.add((int) (b.c.getRed() * 255) + "," + (int) (b.c.getGreen() * 255) + "," + (int) (b.c.getBlue() * 255) + "," + (b.xCord + 1) + "," + (b.yCord + 1));
+                    }
+                    renderList.add((255) + "," +  (255) + "," + (255) + "," + (snake.head.xCord + 1) + "," + (snake.head.yCord + 1));
 
+                    renderList.add((int) (food.c.getRed() * 255) + "," + (int) (food.c.getGreen() * 255) + "," + (int) (food.c.getBlue() * 255) + "," + (food.xCord + 1) + "," + (food.yCord + 1));
 
-                try {Thread.sleep(sleeptime);} catch (Exception e) {}
-            }
+                    StringWriter stringWriter = new StringWriter();
+                    new JSONWriter(stringWriter).object()
+                            .key("argument").value("lobbydraw")
+                            .key("name").value(name)
+                            .key("mapwidth").value(mapWidth)
+                            .key("mapheight").value(mapHeight)
+                            .key("render").value(renderList)
+                            .endObject();
+                    user.clientWorker.sendMessage(stringWriter.toString());
+                    int timeToSleep = (int)(sleeptime - (System.currentTimeMillis() - tickTime));
+                    if (timeToSleep > 0) {
+                        try {Thread.sleep(timeToSleep);} catch (Exception e) {}
+                    }
+                    else {
+                        try {Thread.sleep(1);} catch (Exception e) {}
+                    }
+                }
+            //}
+
         }
     }
 
     public void reset() {
-
-        chatContext.sendMessage(null, "Resetting...\nYour score was " + snake.body.size());
+        chatContext.sendMessage("Resetting...\nYour score was " + snake.body.size());
         snake.reset();
         food = randomFood();
         changeToDirection = Direction.DOWN;
-
     }
 
+    //Search for a food spot randomly, with fallback method for a guaranteed spot or win
     private Body randomFood() {
         Body body = randomFood(mapWidth * mapHeight, 0);
         if (body == null) {
@@ -190,8 +202,10 @@ public class SnakeLobby extends Lobby {
         return body;
 
     }
+
     //Produce vibrant colors, that can't be grayscale (in theory)
     private Color getRandomColor() {
+
         int r = (int)(Math.random() * 3);
         int r1 = (55 + (int)(Math.random() * 200));
         int r2 = (55 + (int)(Math.random() * 200));
@@ -209,6 +223,7 @@ public class SnakeLobby extends Lobby {
     }
 
     //Deep search for a available food pos
+    //Todo: This is currently untested
     private Body deepRandomFood(int xCord, int yCord) {
         Body body = new Body(xCord, yCord, Color.RED);
         //Check if the body is valid
@@ -237,7 +252,7 @@ public class SnakeLobby extends Lobby {
             return body;
         }
     }
-
+    //Find a food spot randomly
     private Body randomFood(int maxIterations, int currentIterations) {
         //if the current iterations is higher than the max, we have failed to find a spot for the food randomly
         if (currentIterations > maxIterations) return null;
@@ -251,13 +266,15 @@ public class SnakeLobby extends Lobby {
                 failed = true;
             }
         }
+        //If the spot failed, recurse until a spot is found or the maxIterations is found
         if (failed) {
             return randomFood(maxIterations, currentIterations + 1);
         }
+        //Found a spot, return the food Body
         return body;
     }
 
-
+    //Load from Settings
     public void loadProps() {
         this.mapWidth = Settings.getIntProperty("tronmapwidth");
         this.mapHeight = Settings.getIntProperty("tronmapheight");

@@ -6,6 +6,8 @@ import org.json.JSONObject;
 
 /**
  * Created by S199753733 on 12/22/2016.
+ *
+ * Update the userlist in the main client
  */
 public class UpdateUsersCommand extends Command {
 

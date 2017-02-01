@@ -10,6 +10,9 @@ import java.io.StringWriter;
 
 /**
  * Created by Evan on 12/13/2016.
+ *
+ * Sign up to the server. Takes a name, password and email.
+ * If the sign up was succsfull, it will return the same things as signin
  */
 public class SignUpCommand extends Command {
     public SignUpCommand() {
@@ -30,7 +33,8 @@ public class SignUpCommand extends Command {
                     .key("highrank").value(Authenticate.checkRank(user.getRank(), Rank.Op))
                     .endObject();
             //Add to general chat
-            ((GeneralChat)(gameServer.chatContexts.getContext("general"))).userJoinedMessage(gameServer, user);
+            //((GeneralChat)(gameServer.chatContexts.getContext("general"))).userJoinedMessage(gameServer, user);
+            gameServer.chatContexts.userAction("joined", user);
             //Tell the clients to add the user to their user list
             StringWriter writer2 = new StringWriter();
             new JSONWriter(writer2).object()

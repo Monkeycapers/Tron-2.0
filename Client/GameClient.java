@@ -6,8 +6,9 @@ import org.json.JSONObject;
 
 /**
  * Created by Evan on 11/3/2016.
- * Extends TCPBridge client class, makes a connection with the Server and handles/sends messages. Functionally similar
- * to the webclient.
+ * Extends TCPBridge client class, handles interactions with the server,
+ * and passes the message to the Commands class.
+ *
  */
 public class GameClient extends Jesty.TCPBridge.Client {
 
@@ -34,6 +35,7 @@ public class GameClient extends Jesty.TCPBridge.Client {
             //System.out.println(jsonObject.toString());
 
             String result = commands.orchestrateCommand(jsonObject);
+            if (!result.equals("noreturnsuccsess") && !result.equals("") && !result.equals("errornocommand")) sendMessage(result);
             //System.out.println(result);
         }
         catch (JSONException e) {
@@ -64,7 +66,7 @@ public class GameClient extends Jesty.TCPBridge.Client {
 
     @Override
     public void onHighPing(long latency) {
-        System.out.println("Warning: High Ping (" + latency + ")");
+        //System.out.println("Warning: High Ping (" + latency + ")");
     }
 
     public void close() {

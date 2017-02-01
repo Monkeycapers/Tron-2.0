@@ -4,12 +4,15 @@ import Jesty.Settings;
 import Jesty.TCPBridge.ClientWorker;
 import org.json.JSONWriter;
 
-import java.io.StringWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by S199753733 on 12/21/2016.
+ *
+ * Contains all of the chatContexts in a list,
+ * also includes chat commands
  */
 public class ChatContexts {
 
@@ -41,6 +44,7 @@ public class ChatContexts {
 
     public void doChatMessage(GameServer gameServer, User user, String name, String message) {
         //Inner command messages (stuff that does not have a gui)
+        //Mostly useful for testing purposes
         if (message.startsWith("/")) {
             String toSend = "";
             if (message.startsWith("/help")) {
@@ -51,7 +55,11 @@ public class ChatContexts {
                         "/ping --> Pong!";
             }
             if (message.startsWith("/list all")) {
-                toSend = Authenticate.getUserList();
+                List<String> toSendList = Authenticate.getUserList();
+                //toSend = Authenticate.getUserList();
+                for (String string: toSendList) {
+                    toSend += string + "\n";
+                }
             }
             else if (message.startsWith("/ping")) {
                 toSend = "Pong";
@@ -102,6 +110,17 @@ public class ChatContexts {
                 }
             }
 
+            else if (message.startsWith("/statesnake")) {
+                if (user.getCurrentLobby() == null) {
+                    SingleUserChatContext chatContext = new SingleUserChatContext(user, "Snake-->" + user.getName(), "Snake");
+                    addNewContext(chatContext);
+                    StateSnakeLobby snakeLobby = new StateSnakeLobby(user, chatContext);
+                    user.setCurrentLobby(snakeLobby);
+                    gameServer.lobbys.addNewLobby(snakeLobby);
+                    snakeLobby.start();
+                }
+            }
+
             else if (message.startsWith("/leavelobby")) {
                 Lobby lobby = user.getCurrentLobby();
                 if (lobby != null) {
@@ -109,6 +128,29 @@ public class ChatContexts {
                     toSend = "Left the lobby";
                 }
             }
+
+//            else if (message.startsWith("/load")) {
+//                String[] split = message.split(" ");
+//                File file = new File(split[1]);
+//                System.out.println(file.exists());
+//                if (file.exists()) {
+//                    try {
+//                        String in = "";
+//                        BufferedReader reader = new BufferedReader(new FileReader(file));
+//                        while ((in = reader.readLine()) != null) {toSend += in + "\n";}
+//                        reader.close();
+//                        //toSend = in;
+//                        //Get the chat context, if it exists send the chat message
+//                        ChatContext chatContext = getContext(name);
+//                        if (chatContext == null) return;
+//                        chatContext.sendMessage(toSend);
+//                        toSend = "";
+//                    }
+//                    catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
 
             if (!toSend.isEmpty()) {
                 StringWriter stringWriter = new StringWriter();
@@ -123,12 +165,14 @@ public class ChatContexts {
 
         }
         else {
+            //Get the chat context, if it exists send the chat message
             ChatContext chatContext = getContext(name);
             if (chatContext == null) return;
-            chatContext.sendMessage(gameServer, user.chatFormatDisplay() + " " + message);
+            chatContext.sendMessage(user.chatFormatDisplay() + " " + message);
         }
     }
 
+    //Remove a user from all chat contexts, if the chat context returns true remove it
     public void removeUser(User user) {
         for (ChatContext chatContext: chatContexts) {
             if (chatContext.removeUser(user)) {
@@ -139,6 +183,14 @@ public class ChatContexts {
         }
     }
 
+    //Perform a userAction (action can be Joined or Left), only calls it if the chatContext is general
+    public void userAction (String action, User user) {
+        for (ChatContext chatContext: chatContexts) {
+            if (chatContext.isGeneral) chatContext.userAction(action, user);
+        }
+    }
+
+    //Remove a user from a specific chatContext.
     public void removeUser (ChatContext chatContext, User user) {
         if (chatContext.removeUser(user)) {
             removeContext(chatContext);

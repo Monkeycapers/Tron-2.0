@@ -6,6 +6,8 @@ import java.awt.*;
 
 /**
  * Created by Evan on 12/27/2016.
+ *
+ * A player class for the tron lobby, that contains the user, it's snake and some propertys.
  */
 public class TronPlayer {
 

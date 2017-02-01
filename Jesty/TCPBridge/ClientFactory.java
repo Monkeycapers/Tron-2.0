@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * Created by S199753733 on 10/18/2016.
  *
- * Handles raw tcp/ip connections, assigning new clientworker to the incoming client
+ * Handles raw tcp/ip connections, assigning new clientworker threads to the incoming client
  */
 
 

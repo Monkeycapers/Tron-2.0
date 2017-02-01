@@ -13,6 +13,12 @@ import java.io.StringWriter;
 
 /**
  * Created by Evan on 12/14/2016.
+ *
+ * Kick the online user from the server. The user will still be able to reauthenticate.
+ *
+ * Arguments: String user, String reason
+ *
+ * Returns: Boolean result
  */
 public class KickCommand extends Command {
 
